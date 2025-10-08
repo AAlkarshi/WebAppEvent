@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Inscription
+{% endblock %}
+
+{% block body %}
+<section class="event-container">
+    <!-- 🧭 COLONNE GAUCHE -->
+    <div class="ColonneGauche">
+        <h2 style="color:white;">S'inscrire</h2>
+        <h5 style="color:grey;">Rejoignez notre communauté</h5>
+        <div style="color:white; display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-envelope"></i>
+            <p style="margin:0;">OrgaEvent@gmail.com</p>
+        </div>
+    </div>
+
+    <!-- 🧱 COLONNE DROITE -->
+    <div class="event-grid">
+        <div class="profile-container">
+            <h1>Créer un compte</h1>
+
+            {{ form_start(form) }}
+            <div class="profile-picture">
+    <label for="avatarUpload" class="profile-upload">
+        <img id="preview" src="{{ asset('uploads/avatars/default.png') }}" alt="Avatar">
+        {{ form_widget(form.avatar_user) }}
+    </label>
+</div>
+
+<script>
+    const input = document.getElementById('{{ form.avatar_user.vars.id }}');
+    const preview = document.getElementById('preview');
+
+    input.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+
+                {{ form_row(form.gender_user) }}
+                {{ form_row(form.lastname_user) }}
+                {{ form_row(form.firstname_user) }}
+                {{ form_row(form.city_user) }}
+                {{ form_row(form.mail_user) }}
+                {{ form_row(form.password_user) }}
+                {{ form_row(form.datebirth_user) }}
+
+                <button type="submit" class="btn-submit">Enregistrer</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</section>
+
+<style>
+    .event-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .ColonneGauche {
+        background-color: #005791;
+        width: 40%;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .event-grid {
+        width: 60%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .profile-container {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .btn-submit {
+        background-color: #005791;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

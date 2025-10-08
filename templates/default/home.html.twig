@@ -1,10 +1,204 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{%  extends "base.html.twig" %}
+
+{%  block title %}
+    Accueil
+{%  endblock %}
+
+{%  block body %}
+    <div style="width: 100%; text-align: center; margin-bottom: 30px;">
+        <h1>Nous retrouver autour d'un événement</h1>
+        <h3>Vous préparez un événement ? Ne restez plus seul ! Retrouvez-vous autour d’une activité tous ensemble.</h3>
+    </div>
+
+    <section class="event-container">
+
+        <!-- 🧭 COLONNE GAUCHE - FILTRES -->
+        <div class="filters">
+            <!-- BARRE DE RECHERCHE -->
+            <form action="verif-form.php" method="get" class="search-bar">
+                <input type="search" name="terme" placeholder="Saisir le nom d'une ville">
+                <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+
+            <!-- Filtres Homme / Femme -->
+            <div class="gender-filter">
+                <button style="padding: 10px; width: 100px; margin: 15px;">Homme</button>
+                <button style="padding: 10px; width: 100px; margin: 15px;">Femme</button>
+            </div>
+
+            <!-- Filtres Date et Durée -->
+            <div class="date-duration">
+                <button style="margin-bottom: 10px;"><i class="fa-solid fa-calendar-days"></i> Dates</button>
+                <br>
+                <button><i class="fa-solid fa-clock"></i> Durée</button>
+            </div>
+
+            <!-- Liste déroulante Catégories -->
+            <form action="ajouter_event.php" method="POST" class="category-form">
+                <select name="id_category" id="categorie" required>
+                    <option value="">Saisir la catégorie</option>
+                    <?php foreach ($categories as $cat): ?>
+                    <option value="<?= htmlspecialchars($cat['id_category']) ?>">
+                        <?= htmlspecialchars($cat['name_category']) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+
+            <!-- Filtres Âge -->
+            <div class="filter">
+                <label>Âge minimum : <span id="minAge">18</span></label>
+                <input type="range" id="minRange" min="18" max="99" value="18">
+
+                <label>Âge maximum : <span id="maxAge">99</span></label>
+                <input type="range" id="maxRange" min="18" max="99" value="99">
+            </div>
+
+            <!-- Filtre Date -->
+            <form method="GET" action="" class="date-filter">
+                <label for="start_date">📅 À partir du :</label>
+                <input type="date" id="start_date" name="start_date" max="<?= date('Y-m-d') ?>" />
+                <button type="submit">Filtrer</button>
+            </form>
+        </div>
+
+        <!-- 🧱 COLONNE DROITE - GRILLE DES ÉVÉNEMENTS -->
+        <div class="event-grid">
+            <div class="event-card">
+                <img src="https://via.placeholder.com/300x180" alt="Événement 1">
+                <h3>Marathon de Paris</h3>
+                <p>Rejoignez-nous pour un grand marathon dans la capitale !</p>
+            </div>
+
+            <div class="event-card">
+                <img src="https://via.placeholder.com/300x180" alt="Événement 2">
+                <h3>Trail des Vosges</h3>
+                <p>Une aventure nature pour les amateurs de course en montagne.</p>
+            </div>
+
+            <div class="event-card">
+                <img src="https://via.placeholder.com/300x180" alt="Événement 3">
+                <h3>5K Solidaire</h3>
+                <p>Participez à une course pour une bonne cause.</p>
+            </div>
+
+           <h1>
+                Mes 3 derniers spectacles
+            </h1>
+<ul>
+    {% for event in events %}
+        <li>{{ event.title }} <em>({{ event.category.name_category }})</em></li>
+    {% endfor %}
+</ul>
+
+        </div>
+    </section>
+
+    <!-- 🧠 SCRIPT JS -->
+    <script>
+        const minRange = document.getElementById('minRange');
+        const maxRange = document.getElementById('maxRange');
+        const minAge = document.getElementById('minAge');
+        const maxAge = document.getElementById('maxAge');
+
+        minRange.addEventListener('input', () => {
+            if (parseInt(minRange.value) > parseInt(maxRange.value)) {
+                minRange.value = maxRange.value;
+            }
+            minAge.textContent = minRange.value;
+        });
+
+        maxRange.addEventListener('input', () => {
+            if (parseInt(maxRange.value) < parseInt(minRange.value)) {
+                maxRange.value = minRange.value;
+            }
+            maxAge.textContent = maxRange.value;
+        });
+    </script>
+
+    <!-- 🎨 STYLE CSS -->
+    <style>
+        /* --- Structure générale --- */
+        .event-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- Colonne gauche (Filtres) --- */
+        .filters {
+            width: 30%;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .filters form,
+        .filters div {
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .search-bar button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+        }
+
+        /* --- Colonne droite (Grille des événements) --- */
+        .event-grid {
+            width: 70%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            padding-bottom: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .event-card:hover {
+            transform: scale(1.03);
+        }
+
+        .event-card img {
+            width: 100%;
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* --- Responsive --- */
+        @media screen and (max-width: 900px) {
+            .event-container {
+                flex-direction: column;
+            }
+            .filters, .event-grid {
+                width: 100%;
+            }
+        }
+    </style>
+
+{%  endblock %}
+
+

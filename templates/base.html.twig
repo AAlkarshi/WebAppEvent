@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Web Event {% endblock %}</title>
+        {% block stylesheets %}
+            {# -- Ici CODE CSS #}
+        {% endblock %}
+
+        <script src="https://kit.fontawesome.com/b04d3e51a0.js" async></script>
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+
+
+    <body>
+
+    {# Chargement de mon HEADER #}
+    {% include 'partials/_header.html.twig' %}
+
+    {# -- Dans body,  contenu de la page #}
+        {% block body %}
+
+
+
+        {% endblock %}
+
+    {# Chargement de mon FOOTER #}
+    {% include 'partials/_footer.html.twig' %}
+
+    </body>
+
+
+</html>
