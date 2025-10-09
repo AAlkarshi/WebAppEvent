@@ -183,7 +183,7 @@ public function getRoles(): array {
     return [$this->role?->value ?? 'ROLE_USER'];
 }
 
-// Obligatoire pour PasswordAuthenticatedUserInterface
+// Obligatoire pour PasswordAuthenticatedUserInterface éxigé par symfony
 public function getPassword(): string {
     return $this->password_user;
 }

@@ -4,8 +4,22 @@
     <div class="logo">Événements+</div>
     <ul class="nav-links">
         <li><a href="{{ path('app_events') }}">Voir tous les événements</a></li>
+
+         {% if app.user %}
+        <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
+        <li>
+            <a href="{{ path('logout') }}"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+               Déconnexion
+            </a>
+            <form id="logout-form" action="{{ path('logout') }}" method="POST" style="display:none;"></form>
+        </li>
+    {% else %}
         <li><a href="{{ path('user_registration') }}">Inscription</a></li>
-        <li><a href="#">Connexion</a></li>
+        <li><a href="{{ path('login') }}">Connexion</a></li>
+    {% endif %}
+
+
         <li><a href="#">Contact</a></li>
     </ul>
 </nav>

@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block body %}
+<section class="profile-container">
+    <div class="profile-card">
+        <h1>Mon Profil</h1>
+
+         {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="profile-info">
+            <div class="avatar">
+                <img src="{{ asset('uploads/avatars/' ~ (user.avatarUser ?? 'default.png')) }}" alt="Avatar" />
+            </div>
+
+            <ul>
+                <li><strong>Nom :</strong> {{ user.lastnameUser }}</li>
+                <li><strong>Prénom :</strong> {{ user.firstnameUser }}</li>
+                <li><strong>Email :</strong> {{ user.mailUser }}</li>
+                <li><strong>Ville :</strong> {{ user.cityUser }}</li>
+                <li><strong>Date de naissance :</strong> {{ user.datebirthUser|date('d/m/Y') }}</li>
+                <li><strong>Date de création :</strong> {{ user.dateCreation|date('d/m/Y') }}</li>
+                <li><strong>Rôle :</strong> {{ user.role.value }}</li>
+            </ul>
+
+
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data' , 'data-turbo': 'false'}}) }}
+                {{ form_row(form.cityUser) }}
+                {{ form_row(form.mailUser) }}
+                {{ form_row(form.plainPassword) }}
+                {{ form_row(form.avatarFile) }}
+                <button class="btn-update">Mettre à jour</button>
+            {{ form_end(form) }}
+
+            
+
+            <div class="profile-actions">
+                <a href="{{ path('logout') }}" class="logout-btn">Déconnexion</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.profile-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.profile-card {
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+    width: 400px;
+    text-align: center;
+}
+
+.profile-card h1 {
+    color: #005791;
+    margin-bottom: 20px;
+}
+
+.avatar img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #005791;
+    margin-bottom: 20px;
+}
+
+.profile-info ul {
+    list-style: none;
+    padding: 0;
+    color: #333;
+    text-align: left;
+}
+
+.profile-info li {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.logout-btn {
+    display: inline-block;
+    background-color: #005791;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 20px;
+}
+
+.logout-btn:hover {
+    background-color: #003f6e;
+}
+</style>
+{% endblock %}

@@ -17,6 +17,8 @@ use Symfony\Component\Validator\Constraints\File;
 
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 #[UniqueEntity(
     fields: ['mail_user'],
     message: 'Cet email est déjà utilisé.'
@@ -61,7 +63,18 @@ class UserType extends AbstractType
                 'label' => 'Adresse e-mail',
             ])
             ->add('password_user', PasswordType::class, [
-                'label' => 'Mot de passe',
+                    'label' => 'Mot de passe',
+                    'mapped' => true,
+                    'required' => true,
+                    'constraints' => [
+                        new Assert\NotBlank(
+                            message: 'Veuillez entrer un mot de passe.'
+                        ),
+                        new Assert\Regex(
+                            pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{14,}$/',
+                            message: 'Le mot de passe doit comporter au moins 14 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.'
+                        ),
+                    ],
             ])
             ->add('city_user', TextType::class, [
                 'label' => 'Ville',
