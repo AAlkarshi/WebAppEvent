@@ -55,6 +55,19 @@
                 {{ form_row(form.datebirth_user) }}
 
                 <button type="submit" class="btn-submit">Enregistrer</button>
+
+                {% for message in app.flashes('error') %}
+    <div class="flash-error">
+        {{ message }}
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('success') %}
+    <div class="flash-success">
+        {{ message }}
+    </div>
+{% endfor %}
+
             {{ form_end(form) }}
         </div>
     </div>
@@ -94,6 +107,15 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
+    }
+
+    .flash-success {
+        color: green;
+        margin-bottom: 10px;
+    }
+    .flash-error {
+        color: red;
+        margin-bottom: 10px;
     }
 </style>
 {% endblock %}

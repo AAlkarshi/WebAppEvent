@@ -10,8 +10,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User 
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct() {
         $this->role = UserRole::User;
@@ -44,7 +47,7 @@ class User
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private ?\DateTimeImmutable $datebirth_user = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $mail_user = null;
 
     #[ORM\Column(length: 255)]
@@ -75,20 +78,16 @@ class User
 
 
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getGenderUser(): ?GenderUser
-    {
+    public function getGenderUser(): ?GenderUser {
         return $this->gender_user;
     }
 
-    public function setGenderUser(GenderUser $gender_user): static
-    {
+    public function setGenderUser(GenderUser $gender_user): static{
         $this->gender_user = $gender_user;
-
         return $this;
     }
 
@@ -104,101 +103,104 @@ class User
         return $this;
     }
 
-    public function getAvatarUser(): ?string
-    {
+    public function getAvatarUser(): ?string {
         return $this->avatar_user;
     }
 
-    public function setAvatarUser(?string $avatar_user): static
-    {
+    public function setAvatarUser(?string $avatar_user): static {
         $this->avatar_user = $avatar_user;
-
         return $this;
     }
 
-    public function getLastnameUser(): ?string
-    {
+    public function getLastnameUser(): ?string {
         return $this->lastname_user;
     }
 
-    public function setLastnameUser(string $lastname_user): static
-    {
+    public function setLastnameUser(string $lastname_user): static {
         $this->lastname_user = $lastname_user;
-
         return $this;
     }
 
-    public function getFirstnameUser(): ?string
-    {
+    public function getFirstnameUser(): ?string {
         return $this->firstname_user;
     }
 
-    public function setFirstnameUser(string $firstname_user): static
-    {
+    public function setFirstnameUser(string $firstname_user): static {
         $this->firstname_user = $firstname_user;
-
         return $this;
     }
 
-    public function getDatebirthUser(): ?\DateTimeImmutable
-    {
+    public function getDatebirthUser(): ?\DateTimeImmutable {
         return $this->datebirth_user;
     }
 
-    public function setDatebirthUser(\DateTimeImmutable $datebirth_user): static
-    {
+    public function setDatebirthUser(\DateTimeImmutable $datebirth_user): static {
         $this->datebirth_user = $datebirth_user;
-
         return $this;
     }
 
-    public function getMailUser(): ?string
-    {
+    public function getMailUser(): ?string {
         return $this->mail_user;
     }
 
-    public function setMailUser(string $mail_user): static
-    {
+    public function setMailUser(string $mail_user): static {
         $this->mail_user = $mail_user;
-
         return $this;
     }
 
-    public function getPasswordUser(): ?string
-    {
+    public function getPasswordUser(): ?string {
         return $this->password_user;
     }
 
-    public function setPasswordUser(string $password_user): static
-    {
+    public function setPasswordUser(string $password_user): static {
         $this->password_user = $password_user;
-
         return $this;
     }
 
-    public function getCityUser(): ?string
-    {
+    public function getCityUser(): ?string {
         return $this->city_user;
     }
 
-    public function setCityUser(string $city_user): static
-    {
+    public function setCityUser(string $city_user): static {
         $this->city_user = $city_user;
-
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTimeImmutable
-    {
+    public function getDateCreation(): ?\DateTimeImmutable {
         return $this->date_creation;
     }
 
-    public function setDateCreation(\DateTimeImmutable $date_creation): static
-    {
+    public function setDateCreation(\DateTimeImmutable $date_creation): static{
         $this->date_creation = $date_creation;
-
         return $this;
     }
+
+
+
+// Obligatoire pour UserInterface
+public function getRoles(): array {
+    // On retourne le rôle de l'utilisateur sous forme de tableau
+    return [$this->role?->value ?? 'ROLE_USER'];
+}
+
+// Obligatoire pour PasswordAuthenticatedUserInterface
+public function getPassword(): string {
+    return $this->password_user;
+}
+
+
+// Retourne l'identifiant unique de l'utilisateur (email ici)
+    public function getUserIdentifier(): string {
+        return $this->mail_user;
+    }
+
+    // Obligatoire pour UserInterface
+    public function eraseCredentials(): void {
+        // Pas d'information temporaire à effacer pour l'instant
+    }
+
+
+
 
     /**
      * @return Collection<int, Register>

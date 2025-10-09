@@ -40,7 +40,6 @@ class Register
     public function setActive(bool $active): static
     {
         $this->active = $active;
-
         return $this;
     }
 
@@ -52,7 +51,6 @@ class Register
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -64,7 +62,6 @@ class Register
     public function setEvent(?Event $Event): static
     {
         $this->Event = $Event;
-
         return $this;
     }
 }

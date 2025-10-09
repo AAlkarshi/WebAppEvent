@@ -12,6 +12,16 @@ security:
         main:
             lazy: true
             provider: users_in_memory
+            
+            form_login:
+                login_path: login
+                check_path: login
+                username_parameter: mail_user
+                password_parameter: password_user
+                default_target_path: /profil  # redirection après login réussi
+            logout:
+                path: logout
+                target: /
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -22,8 +32,8 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:

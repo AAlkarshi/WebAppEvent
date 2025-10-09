@@ -15,6 +15,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\File;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
+#[UniqueEntity(
+    fields: ['mail_user'],
+    message: 'Cet email est déjà utilisé.'
+)]
+
 class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -25,14 +32,11 @@ class UserType extends AbstractType
                 'mapped' => false, // ce champ n’est pas directement lié à l’entité
                 'required' => false,
                 'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                        ],
-                        'mimeTypesMessage' => 'Veuillez télécharger un fichier PNG ou JPEG valide',
-                    ])
+                    new File(
+                        maxSize: '2M',
+                        mimeTypes: ['image/jpeg', 'image/png'],
+                        mimeTypesMessage: 'Veuillez télécharger un fichier PNG ou JPEG valide'
+                    )
                 ],
             ])
             ->add('gender_user', ChoiceType::class, [
