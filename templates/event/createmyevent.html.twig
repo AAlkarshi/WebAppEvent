@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un événement{% endblock %}
+
+{% block body %}
+<section class="create-event">
+    <h1>Créer un nouvel événement</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="flash-success">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+        {{ form_widget(form) }}
+        <button type="submit" class="btn">Créer</button>
+    {{ form_end(form) }}
+</section>
+
+<style>
+.create-event {
+    width: 50%;
+    margin: 40px auto;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+}
+.btn {
+    background: #005791;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
+{% endblock %}

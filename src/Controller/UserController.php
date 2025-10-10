@@ -167,6 +167,63 @@ class UserController extends AbstractController
 
 
 
+    /* INSCRIPTION ADMIN */
+    #[Route('/registrationAdmin', name: 'userAdmin_registration', methods: ['GET','POST'])]
+public function registrationAdmin(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response
+{
+    $user = new User();
+    $form = $this->createForm(UserType::class, $user);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+
+        $plainPassword = $form->get('password_user')->getData();
+        $regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{14,}$/';
+        if (!preg_match($regex, $plainPassword)) {
+            $this->addFlash('error', '❌ Le mot de passe doit comporter au moins 14 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial.');
+            return $this->redirectToRoute('userAdmin_registration');
+        }
+
+        $existingUser = $em->getRepository(User::class)->findOneBy([
+            'mail_user' => $user->getMailUser()
+        ]);
+
+        if ($existingUser) {
+            $this->addFlash('error', 'Cet email est déjà utilisé.');
+            return $this->redirectToRoute('userAdmin_registration');
+        }
+
+        // Définir le rôle ADMIN
+        $user->setRole(\App\Enum\UserRole::Admin);
+
+        // Hash du MDP
+        $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+        $user->setPasswordUser($hashedPassword);
+
+        $avatarFile = $form->get('avatar_user')->getData();
+        if ($avatarFile) {
+            $newFilename = uniqid().'.'.$avatarFile->guessExtension();
+            $avatarFile->move(
+                $this->getParameter('avatars_directory'),
+                $newFilename
+            );
+            $user->setAvatarUser($newFilename);
+        }
+
+        $em->persist($user);
+        $em->flush();
+
+        $this->addFlash('success', 'Inscription Admin réussie !');
+        return $this->redirectToRoute('login');
+    }
+
+    return $this->render('default/registrationAdmin.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+
+
+
 
 
 

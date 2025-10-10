@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes événements inscrits{% endblock %}
+
+{% block body %}
+<h1>🎟️ Mes événements inscrits</h1>
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('info') %}
+    <div class="alert alert-info">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">{{ message }}</div>
+{% endfor %}
+
+{% if registrations is empty %}
+    <p>Aucun événement pour le moment.</p>
+{% else %}
+    <ul>
+        {% for reg in registrations %}
+            <li>
+                <strong>{{ reg.event.titleEvent }}</strong> — 
+                {{ reg.event.dateTimeEvent|date('d/m/Y H:i') }}
+                <a href="{{ path('event_unregister', {id: reg.event.id}) }}" class="btn btn-sm btn-danger">Se désinscrire</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

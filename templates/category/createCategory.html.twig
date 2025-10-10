@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une catégorie{% endblock %}
+
+{% block body %}
+<section class="category-container">
+    <h1>Créer une catégorie</h1>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {{ form_start(form) }}
+        {{ form_row(form.name_category) }}
+        <button class="btn-submit">Créer</button>
+    {{ form_end(form) }}
+</section>
+
+<style>
+.category-container {
+    width: 400px;
+    margin: 50px auto;
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.btn-submit {
+    background-color: #005791;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background-color: #003f6e;
+}
+
+.flash-success {
+    color: green;
+    margin-bottom: 10px;
+}
+
+.flash-error {
+    color: red;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}

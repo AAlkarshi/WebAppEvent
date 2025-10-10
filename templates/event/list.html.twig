@@ -14,36 +14,63 @@ Accueil
 
     <!-- 🧭 COLONNE GAUCHE - FILTRES -->
     <div class="filters">
-        <!-- BARRE DE RECHERCHE -->
-        <form action="verif-form.php" method="get" class="search-bar">
-            <input type="search" name="terme" placeholder="Saisir le nom d'une ville">
+
+    {% if selectedCategory %}
+            <p style="text-align:center; font-style:italic;">
+                Événements pour la catégorie :
+                <strong>
+                    {{ categories|filter(cat => cat.id == selectedCategory)|first.nameCategory }}
+                </strong>
+        </p>
+    {% endif %}
+
+    <!-- MSG D'AFFICHAGE POUR BARRE DE RECHERCHE FILTREE RESULTAT-->
+    {% if searchCity %}
+        <p style="text-align:center; font-style:italic;">
+            Résultats pour la ville : <strong>{{ searchCity }}</strong>
+        </p>
+    {% endif %}
+
+
+
+
+
+        <!-- BARRE DE RECHERCHE PAR VILLE -->
+        <form action="{{ path('app_events') }}" method="get" class="search-bar">
+            <input type="search" name="terme" placeholder="Saisir le nom d'une ville" value="{{ searchCity ?? '' }}">
             <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
         </form>
 
-        <!-- Filtres Homme / Femme -->
-        <div class="gender-filter">
-            <button style="padding: 10px; width: 100px; margin: 15px;">Homme</button>
-            <button style="padding: 10px; width: 100px; margin: 15px;">Femme</button>
-        </div>
+
+        
 
         <!-- Filtres Date et Durée -->
         <div class="date-duration">
             <button style="margin-bottom: 10px;"><i class="fa-solid fa-calendar-days"></i> Dates</button>
-            <br>
-            <button><i class="fa-solid fa-clock"></i> Durée</button>
+            
+        </div>
+                
+                <!--  HORLOGE DUREE FILTRE
+                    <div>
+                        <button><i class="fa-solid fa-clock"></i> Durée</button>
+                    </div>
+                -->
+
+       <!-- Liste déroulante Catégories -->
+        <div class="filter-row">
+            <form action="{{ path('app_events') }}" method="get">
+                <select name="id_category" onchange="this.form.submit()">
+                    <option value="">Toutes les catégories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selectedCategory == cat.id %}selected{% endif %}>
+                            {{ cat.nameCategory }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
         </div>
 
-        <!-- Liste déroulante Catégories -->
-        <form action="ajouter_event.php" method="POST" class="category-form">
-            <select name="id_category" id="categorie" required>
-                <option value="">Saisir la catégorie</option>
-                <?php foreach ($categories as $cat): ?>
-                <option value="<?= htmlspecialchars($cat['id_category']) ?>">
-                    <?= htmlspecialchars($cat['name_category']) ?>
-                </option>
-                <?php endforeach; ?>
-            </select>
-        </form>
+
 
         <!-- Filtres Âge -->
         <div class="filter">
@@ -63,25 +90,45 @@ Accueil
     </div>
 
     <!-- 🧱 COLONNE DROITE - GRILLE DES ÉVÉNEMENTS -->
-    <div class="event-grid">
-        <div class="event-card">
-            <img src="https://via.placeholder.com/300x180" alt="Événement 1">
-            <h3>Marathon de Paris</h3>
-            <p>Rejoignez-nous pour un grand marathon dans la capitale !</p>
-        </div>
+    
+<div class="event-container">
+      {% if events is not empty %}
+        <div class="events-grid">
+            {% for event in events %}
+                <div class="event-card">
+                    {# Image - utilise le fichier si présent sinon image par défaut #}
+                    {% if event.imageEvent %}
+                        <img src="{{ asset('uploads/avatars/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}" class="event-image">
+                    {% else %}
+                        <img src="{{ asset('uploads/avatars/default.png') }}" alt="Image par défaut" class="event-image">
+                    {% endif %}
 
-        <div class="event-card">
-            <img src="https://via.placeholder.com/300x180" alt="Événement 2">
-            <h3>Trail des Vosges</h3>
-            <p>Une aventure nature pour les amateurs de course en montagne.</p>
-        </div>
+                    {# Contenu overlay (titre centré) #}
+                    <div class="event-overlay">
+                        <h2 class="event-title">{{ event.titleEvent }}</h2>
 
-        <div class="event-card">
-            <img src="https://via.placeholder.com/300x180" alt="Événement 3">
-            <h3>5K Solidaire</h3>
-            <p>Participez à une course pour une bonne cause.</p>
+                        <div class="event-meta">
+                            {# catégorie (protégé si null) #}
+                            {% if event.category %}
+                                <span class="event-category">{{ event.category.nameCategory }}</span>
+                            {% endif %}
+
+                            <div class="event-date">📅 {{ event.dateTimeEvent ? (event.dateTimeEvent|date('d/m/Y H:i')) : 'Date non définie' }}</div>
+
+                            {% if event.address %}
+                                <div class="event-address">📍 {{ event.address.address }}, {{ event.address.city }}</div>
+                            {% endif %}
+                            
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-    </div>
+    {% else %}
+        <p>Aucun événement trouvé.</p>
+    {% endif %}
+</div>
+
 </section>
 
 <!-- 🧠 SCRIPT JS -->

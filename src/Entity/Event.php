@@ -7,6 +7,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use App\Entity\User;
+
+
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
 {
@@ -34,11 +37,12 @@ class Event
     #[ORM\Column(nullable: true)]
     private ?int $duration_event = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $nbx_participant = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $nbx_participant_max = null;
+
 
     /**
      * @var Collection<int, Register>

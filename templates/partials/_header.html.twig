@@ -5,8 +5,31 @@
     <ul class="nav-links">
         <li><a href="{{ path('app_events') }}">Voir tous les événements</a></li>
 
+        
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <li><a href="{{ path('createCategory') }}">Créer une Catégorie</a></li> 
+            <li><a href="{{ path('userAdmin_registration') }}">Créer un Utilisateur Admin </a></li>
+        {% endif %}
+
+
          {% if app.user %}
-        <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
+         <li><a href="{{ path('registeredevents') }}"> Evénements Inscrits </a></li>
+
+         <li><a href="{{ path('createmyevent') }}">Créer mon événement  </a></li>
+        
+         <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
+
+
+         <li><a href="{{ path('address_new') }}">Ajouter une Adresse pour mon événement </a></li>
+
+
+
+
+
+       
+
+
         <li>
             <a href="{{ path('logout') }}"
                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
