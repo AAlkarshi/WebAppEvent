@@ -44,17 +44,7 @@ Accueil
 
         
 
-        <!-- Filtres Date et Durée -->
-        <div class="date-duration">
-            <button style="margin-bottom: 10px;"><i class="fa-solid fa-calendar-days"></i> Dates</button>
-            
-        </div>
-                
-                <!--  HORLOGE DUREE FILTRE
-                    <div>
-                        <button><i class="fa-solid fa-clock"></i> Durée</button>
-                    </div>
-                -->
+       
 
        <!-- Liste déroulante Catégories -->
         <div class="filter-row">
@@ -72,61 +62,127 @@ Accueil
 
 
 
-        <!-- Filtres Âge -->
-        <div class="filter">
-            <label>Âge minimum : <span id="minAge">18</span></label>
-            <input type="range" id="minRange" min="18" max="99" value="18">
+        <!-- Filtres Âge 
+            <div class="filter">
+                <label>Âge minimum : <span id="minAge">18</span></label>
+                <input type="range" id="minRange" min="18" max="99" value="18">
 
-            <label>Âge maximum : <span id="maxAge">99</span></label>
-            <input type="range" id="maxRange" min="18" max="99" value="99">
-        </div>
+                <label>Âge maximum : <span id="maxAge">99</span></label>
+                <input type="range" id="maxRange" min="18" max="99" value="99">
+            </div>
+        -->
 
         <!-- Filtre Date -->
-        <form method="GET" action="" class="date-filter">
+        <form method="GET" action="{{ path('app_events') }}" class="date-filter">
             <label for="start_date">📅 À partir du :</label>
-            <input type="date" id="start_date" name="start_date" max="<?= date('Y-m-d') ?>" />
+            <input type="date" id="start_date" name="start_date" value="{{ app.request.query.get('start_date') }}">
+<br>
+            <label for="end_date">📅 Jusqu'au :</label>
+            <input type="date" id="end_date" name="end_date" value="{{ app.request.query.get('end_date') }}">
+
+            {# Conserver les autres filtres lors du submit #}
+            <input type="hidden" name="id_category" value="{{ selectedCategory ?? '' }}">
+            <input type="hidden" name="terme" value="{{ searchCity ?? '' }}">
+
             <button type="submit">Filtrer</button>
         </form>
+
+       
+
+
+        {% if events is empty %}
+    <p>Vous n’avez créé aucun événement pour le moment.</p>
+{% else %}
+    {# Affiche le nombre total d'événements une seule fois #}
+  <p>
+    {{ events.getTotalItemCount }} événement{{ events.getTotalItemCount > 1 ? 's' : '' }} trouvé{{ events.getTotalItemCount > 1 ? 's' : '' }}.
+</p>
+   
+{% endif %}
+
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+
     </div>
 
     <!-- 🧱 COLONNE DROITE - GRILLE DES ÉVÉNEMENTS -->
     
 <div class="event-container">
+    
       {% if events is not empty %}
-        <div class="events-grid">
-            {% for event in events %}
-                <div class="event-card">
-                    {# Image - utilise le fichier si présent sinon image par défaut #}
-                    {% if event.imageEvent %}
-                        <img src="{{ asset('uploads/avatars/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}" class="event-image">
-                    {% else %}
-                        <img src="{{ asset('uploads/avatars/default.png') }}" alt="Image par défaut" class="event-image">
-                    {% endif %}
+    <div class="events-grid">
+        {% for event in events %}
+            <div class="event-card">
+                {% if event.imageEvent %}
+                    <img src="{{ asset('uploads/avatars/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}" class="event-image">
+                {% else %}
+                    <img src="{{ asset('uploads/avatars/default.png') }}" alt="Image par défaut" class="event-image">
+                {% endif %}
 
-                    {# Contenu overlay (titre centré) #}
-                    <div class="event-overlay">
-                        <h2 class="event-title">{{ event.titleEvent }}</h2>
+                <div class="event-overlay">
+                    <h2 class="event-title">{{ event.titleEvent }}</h2>
 
-                        <div class="event-meta">
-                            {# catégorie (protégé si null) #}
-                            {% if event.category %}
-                                <span class="event-category">{{ event.category.nameCategory }}</span>
-                            {% endif %}
+                    <div class="event-meta">
+                        {% if event.category %}
+                            <span class="event-category">{{ event.category.nameCategory }}</span>
+                        {% endif %}
 
-                            <div class="event-date">📅 {{ event.dateTimeEvent ? (event.dateTimeEvent|date('d/m/Y H:i')) : 'Date non définie' }}</div>
+                        <div class="event-date">📅 {{ event.dateTimeEvent ? (event.dateTimeEvent|date('d/m/Y H:i')) : 'Date non définie' }}</div>
 
-                            {% if event.address %}
-                                <div class="event-address">📍 {{ event.address.address }}, {{ event.address.city }}</div>
-                            {% endif %}
-                            
-                        </div>
+                        {% if event.address %}
+                            <div class="event-address">📍 {{ event.address.address }}, {{ event.address.city }}</div>
+                        {% endif %}
+
+
+                        
+
+
+
+                {# Bouton “S’inscrire” seulement si l’utilisateur est connecté #}
+                    {% if app.user %}
+                    <button>    
+                    <a href="{{ path('viewthisevent', {id: event.id}) }}" class="btn btn-primary">
+                            Voir +
+                        </a>
+                    </button>
+                        <br>
+                        
+                    <button>
+                        <a href="{{ path('event_register', {id: event.id}) }}" class="btn btn-primary">
+                            S'inscrire à cet événement
+                        </a>
+                    </button>
+                        {% else %}
+                            <p><em>Connectez-vous pour vous inscrire</em></p>
+                        {% endif %}
+
+
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>Aucun événement trouvé.</p>
-    {% endif %}
+            </div>
+        {% endfor %}
+
+
+
+
+<div class="pagination">
+    {{ knp_pagination_render(events) }}
+</div>
+
+
+
+    </div>
+{% else %}
+    <p>Aucun événement trouvé.</p>
+{% endif %}
+
 </div>
 
 </section>
@@ -158,8 +214,9 @@ Accueil
     /* --- Structure générale --- */
     .event-container {
         display: flex;
+        flex-direction : row;
         justify-content: space-between;
-        align-items: flex-start;
+        
         gap: 30px;
         width: 100%;
         padding: 20px;
@@ -200,40 +257,83 @@ Accueil
     }
 
     /* --- Colonne droite (Grille des événements) --- */
-    .event-grid {
-        width: 70%;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 25px;
-    }
+    /* --- Grille d'événements --- */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 événements par ligne */
+    gap: 30px;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
 
-    .event-card {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        text-align: center;
-        padding-bottom: 20px;
-        transition: transform 0.2s ease;
-    }
+/* --- Carte d'événement --- */
+.event-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-    .event-card:hover {
-        transform: scale(1.03);
-    }
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
 
-    .event-card img {
-        width: 100%;
-        border-radius: 10px 10px 0 0;
-    }
+.event-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
 
-    /* --- Responsive --- */
-    @media screen and (max-width: 900px) {
-        .event-container {
-            flex-direction: column;
-        }
-        .filters, .event-grid {
-            width: 100%;
-        }
+.event-overlay {
+    padding: 15px;
+}
+
+.event-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.event-meta {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.event-category {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1200px) {
+    .events-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
+}
+
+@media (max-width: 800px) {
+    .events-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .events-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+  
 </style>
 
 {%  endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ event.titleEvent }}{% endblock %}
+
+
+{# //VOIR LES NIFOS D'UN EVENT AFIN DE S'Y INFORMER #}
+{% block body %}
+    <div class="event-details">
+        <h1>{{ event.titleEvent }}</h1>
+
+        {% if event.category %}
+            <p><strong>Catégorie :</strong> {{ event.category.nameCategory }}</p>
+        {% endif %}
+
+        <p><strong>Date :</strong> {{ event.dateTimeEvent|date('d/m/Y H:i') }}</p>
+
+        {% if event.address %}
+            <p><strong>Adresse :</strong> {{ event.address.address }}, {{ event.address.city }} ({{ event.address.cp }})</p>
+        {% endif %}
+
+        {% if event.descriptionEvent %}
+            <p><strong>Description :</strong> {{ event.descriptionEvent }}</p>
+        {% endif %}
+
+        {% if event.address.getCity %}
+            <p><strong>Ville : </strong> {{ event.address.getCity() }} </p>
+        {% endif %}
+
+         {% if event.address.getCp%}
+            <p><strong>Code Postal : </strong> {{ event.address.getCp() }} </p>
+        {% endif %}
+
+       
+   
+
+        <p><a href="{{ path('app_events') }}" class="btn btn-secondary">⬅ Retour aux événements</a></p>
+    </div>
+{% endblock %}

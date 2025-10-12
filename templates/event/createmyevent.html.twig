@@ -10,6 +10,14 @@
         <div class="flash-success">{{ message }}</div>
     {% endfor %}
 
+<!-- Message d’erreur visuel dans le formulaire -->
+    {% if form.dateTime_event.vars.errors|length > 0 %}
+    <div style="color: red; font-style: italic; margin-top: 5px;">
+        {{ form_errors(form.dateTime_event) }}
+    </div>
+{% endif %}
+
+
     {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
         {{ form_widget(form) }}
         <button type="submit" class="btn">Créer</button>

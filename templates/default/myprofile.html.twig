@@ -7,7 +7,7 @@
     <div class="profile-card">
         <h1>Mon Profil</h1>
 
-         {% for label, messages in app.flashes %}
+        {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="flash-{{ label }}">{{ message }}</div>
             {% endfor %}
@@ -28,19 +28,33 @@
                 <li><strong>Rôle :</strong> {{ user.role.value }}</li>
             </ul>
 
+   {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false'}}) }}
 
-            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data' , 'data-turbo': 'false'}}) }}
-                {{ form_row(form.cityUser) }}
-                {{ form_row(form.mailUser) }}
-                {{ form_row(form.plainPassword) }}
-                {{ form_row(form.avatarFile) }}
-                <button class="btn-update">Mettre à jour</button>
-            {{ form_end(form) }}
+    {{ form_row(form.cityUser) }}
 
-            
+    {# Affiche le champ mail avec les erreurs #}
+    <div class="form-group">
+        {{ form_label(form.mail_user) }}
+        {{ form_widget(form.mail_user) }}
+        {{ form_errors(form.mail_user) }}
+    </div>
+
+    {{ form_row(form.plainPassword) }}
+    {{ form_row(form.avatarFile) }}
+
+    <button class="btn-update">Mettre à jour</button>
+
+{{ form_end(form) }}
+
 
             <div class="profile-actions">
+                
                 <a href="{{ path('logout') }}" class="logout-btn">Déconnexion</a>
+                
+                <form action="{{ path('delete_account') }}" method="post" onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete-account') }}">
+                    <button type="submit" class="delete-btn">Supprimer le compte</button>
+                </form>
             </div>
         </div>
     </div>
@@ -87,18 +101,43 @@
     font-size: 16px;
 }
 
-.logout-btn {
-    display: inline-block;
-    background-color: #005791;
+.btn-update {
+    background-color: #007bff;
     color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.profile-actions {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logout-btn,
+.forgot-btn,
+.delete-btn {
+    display: inline-block;
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none;
-    margin-top: 20px;
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s ease;
 }
 
-.logout-btn:hover {
-    background-color: #003f6e;
-}
+.logout-btn { background-color: #005791; }
+.logout-btn:hover { background-color: #003f6e; }
+
+.forgot-btn { background-color: #ffc107; color: #333; }
+.forgot-btn:hover { background-color: #e0a800; color: white; }
+
+.delete-btn { background-color: #dc3545; }
+.delete-btn:hover { background-color: #b02a37; }
 </style>
 {% endblock %}

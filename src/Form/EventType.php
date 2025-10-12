@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\Category;
 use App\Entity\Address;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Form\AddressType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -14,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
+
 
 
 class EventType extends AbstractType
@@ -33,10 +36,29 @@ class EventType extends AbstractType
                 'label' => 'Description',
                 'required' => false,
             ])
-            ->add('dateTime_event', DateTimeType::class, [
-                'label' => 'Date et heure',
-                'widget' => 'single_text',
-            ])
+            
+        
+           ->add('dateTime_event', DateTimeType::class, [
+    'label' => 'Date et heure',
+    'widget' => 'single_text',
+    'input' => 'datetime', // 👈 obligatoire
+    'data' => new \DateTime('now', new \DateTimeZone('Europe/Paris')),
+    'attr' => [
+        'min' => (new \DateTime('now', new \DateTimeZone('Europe/Paris')))->format('Y-m-d\TH:i'),
+    ],
+    'constraints' => [
+        new GreaterThanOrEqual([
+            'value' => new \DateTime('now', new \DateTimeZone('Europe/Paris')),
+            'message' => 'La date et l’heure doivent être postérieures à l’instant présent.',
+        ]),
+    ],
+])
+
+
+
+
+
+
             ->add('duration_event', IntegerType::class, [
                 'label' => 'Durée (en minutes)',
                 'required' => false,
@@ -57,16 +79,23 @@ class EventType extends AbstractType
                 'label' => 'Catégorie',
                 'placeholder' => 'Choisir une catégorie',
             ])
-            ->add('address', EntityType::class, [
-                'class' => Address::class,
-                'choice_label' => function(Address $a) {
-                    return $a->getAddress() . ', ' . $a->getCity() . ' (' . $a->getCp() . ')';
-                },
-                'label' => 'Adresse',
-                'placeholder' => 'Choisir une adresse',
+             
+            ->add('new_address', TextType::class, [
+                'label' => 'Nouvelle adresse',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('new_city', TextType::class, [
+                'label' => 'Ville',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('new_cp', IntegerType::class, [
+                'label' => 'Code postal',
+                'mapped' => false,
+                'required' => false,
             ]);
-            
-            ;
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

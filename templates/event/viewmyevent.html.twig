@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ event.titleEvent }}{% endblock %}
+
+{% block body %}
+    <h1>{{ event.titleEvent }}</h1>
+    <p><strong>Date :</strong> {{ event.dateTimeEvent|date('d/m/Y H:i') }}</p>
+    <p><strong>Description :</strong> {{ event.descriptionEvent }}</p>
+    <p><strong>Catégorie :</strong> {{ event.category ? event.category.nameCategory : 'Aucune catégorie' }}</p>
+    <p><strong>Adresse :</strong> {{ event.address.getAddress() }}, 
+    <p><strong>Ville : </strong> {{ event.address.getCity() }} </p>
+    <p><strong>Code Postal : </strong> {{ event.address.getCp() }} </p>
+
+
+
+
+
+    <a href="{{ path('myevents') }}" class="btn btn-secondary mt-3">⬅ Retour à mes événements</a>
+{% endblock %}

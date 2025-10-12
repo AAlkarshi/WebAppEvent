@@ -1,0 +1,28 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+Mes événements créés
+{% endblock %}
+
+{% block body %}
+<h2>Mes événements créés</h2>
+
+{% if events is empty %}
+    <p>Vous n’avez créé aucun événement pour le moment.</p>
+{% else %}
+    <p>{{ events|length }} événement{{ events|length > 1 ? 's' : '' }} trouvé{{ events|length > 1 ? 's' : '' }}.</p>
+    <ul>
+        {% for event in events %}
+            <li>
+                {{ event.titleEvent }} — {{ event.dateTimeEvent|date('d/m/Y H:i') }}
+                
+                <a href="{{ path('view_myevent', {id: event.id}) }}"> Voir </a>
+
+                <a href="{{ path('editmyevent', {id: event.id}) }}">Modifier</a>
+                <a href="{{ path('deletemyevent', {id: event.id}) }}" onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
+                
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

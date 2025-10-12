@@ -34,17 +34,18 @@ class ProfileType extends AbstractType
                 'label' => 'Ville',
                 'required' => false,
             ])
-            ->add('mailUser', EmailType::class, [
+            ->add('mail_user', EmailType::class, [
                 'label' => 'E-mail',
+                 'constraints' => [
+                    new Assert\NotBlank(['message' => 'L’e-mail est obligatoire.']),
+                    new Assert\Email(['message' => 'Veuillez entrer un e-mail valide.']),
+                ],
             ])
            ->add('plainPassword', PasswordType::class, [
                 'mapped' => false,
                 'required' => false,
                 'label' => 'Nouveau mot de passe',
                 'constraints' => [
-                  /*  new Assert\NotBlank([
-                        'message' => 'Veuillez entrer un mot de passe.'
-                    ]), */
                     new Assert\Regex([
                         'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{14,}$/',
                         'message' => 'Le mot de passe doit comporter au moins 14 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial.'

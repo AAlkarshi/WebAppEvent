@@ -14,14 +14,19 @@
 
 
          {% if app.user %}
-         <li><a href="{{ path('registeredevents') }}"> Evénements Inscrits </a></li>
 
-         <li><a href="{{ path('createmyevent') }}">Créer mon événement  </a></li>
+
+        <li> <a href="{{ path('myevents') }}">Mes événements </a></li>
+
+
+        <li><a href="{{ path('registeredevents') }}"> Evénements Inscrits </a></li>
+
+        <li><a href="{{ path('createmyevent') }}">Créer mon événement  </a></li>
         
-         <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
+        <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
 
 
-         <li><a href="{{ path('address_new') }}">Ajouter une Adresse pour mon événement </a></li>
+        <!-- <li><a href="{{ path('address_new') }}">Ajouter une Adresse pour mon événement </a></li>  -->
 
 
 

@@ -31,6 +31,27 @@ class EventRepository extends ServiceEntityRepository
 //        ;
 //    }
 
+    public function findFromDate(\DateTimeImmutable $date): array {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.dateTime_event >= :date')
+            ->setParameter('date', $date)
+            ->orderBy('e.dateTime_event', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findBetweenDates(\DateTimeImmutable $start, \DateTimeImmutable $end): array {
+    return $this->createQueryBuilder('e')
+        ->andWhere('e.dateTime_event BETWEEN :start AND :end')
+        ->setParameter('start', $start)
+        ->setParameter('end', $end)
+        ->orderBy('e.dateTime_event', 'ASC')
+        ->getQuery()
+        ->getResult();
+}
+
+
+
 //    public function findOneBySomeField($value): ?Event
 //    {
 //        return $this->createQueryBuilder('e')

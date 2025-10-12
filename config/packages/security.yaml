@@ -24,7 +24,7 @@ security:
                 default_target_path: /myprofile  # redirection après login réussi
             logout:
                 path: logout
-                target: /
+                target: app_events
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

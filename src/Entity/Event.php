@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 use App\Entity\User;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
@@ -31,8 +32,12 @@ class Event
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description_event = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $dateTime_event = null;
+    #[ORM\Column(type: 'datetime')]
+    #[Assert\NotBlank(message: "La date de l'événement est obligatoire.")]
+    #[Assert\GreaterThanOrEqual(
+    value: "now",
+    message: "⚠️ La date et l'heure de l'événement doivent être dans le futur (au moins à la minute actuelle).")]
+    private ?\DateTime $dateTime_event = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $duration_event = null;
@@ -42,6 +47,14 @@ class Event
 
     #[ORM\Column(nullable: true)]
     private ?int $nbx_participant_max = null;
+
+
+
+
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $createdBy = null;
 
 
     /**
@@ -113,12 +126,12 @@ class Event
         return $this;
     }
 
-    public function getDateTimeEvent(): ?\DateTimeImmutable
+    public function getDateTimeEvent(): ?\DateTime
     {
         return $this->dateTime_event;
     }
 
-    public function setDateTimeEvent(\DateTimeImmutable $dateTime_event): static
+    public function setDateTimeEvent(\DateTime $dateTime_event): static
     {
         $this->dateTime_event = $dateTime_event;
 
@@ -160,6 +173,28 @@ class Event
 
         return $this;
     }
+
+
+
+
+
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $user): self
+    {
+        $this->createdBy = $user;
+        return $this;
+    }
+
+
+
+
+
+
 
     /**
      * @return Collection<int, Register>

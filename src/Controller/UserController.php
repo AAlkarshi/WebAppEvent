@@ -4,6 +4,9 @@ namespace App\Controller;
 use App\Form\ProfileType;
 
 use App\Entity\User;
+use App\Repository\EventRepository;
+use App\Entity\Register;
+use App\Entity\Category;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +19,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 
 
@@ -74,7 +81,7 @@ class UserController extends AbstractController
         $em->flush();
 
         $this->addFlash('success', 'Inscription réussie !');
-        return $this->redirectToRoute('user_registration');
+        return $this->redirectToRoute('login');
         }
 
 
@@ -225,14 +232,77 @@ public function registrationAdmin(Request $request, UserPasswordHasherInterface 
 
 
 
+/* SUPPRESSION DE COMPTE */
+#[Route('/delete-account', name: 'delete_account', methods: ['POST'])]
+public function deleteAccount(Request $request, EntityManagerInterface $em, TokenStorageInterface $tokenStorage, EventRepository $eventRepository): Response
+{
+    $user = $this->getUser();
+
+    if (!$user) {
+        return $this->redirectToRoute('login');
+    }
+
+    // Vérifie le CSRF token
+    if ($this->isCsrfTokenValid('delete-account', $request->request->get('_token'))) {
+
+        // 🔹 Supprime les événements créés par l'utilisateur
+        $events = $eventRepository->findBy(['createdBy' => $user]);
+        foreach ($events as $event) {
+            $em->remove($event);
+        }
+
+        // 🔹 Supprimer toutes les inscriptions liées à l'utilisateur
+        foreach ($user->getRegisters() as $register) {
+            $em->remove($register);
+        }
+
+        // 🔹 Supprimer toutes les catégories liées à l'utilisateur
+        foreach ($user->getCategories() as $category) {
+            $em->remove($category);
+        }
+
+        // 🔹 Supprimer l'utilisateur
+        $em->remove($user);
+        $em->flush();
+
+        // Déconnecter l'utilisateur
+        $tokenStorage->setToken(null);
+        $request->getSession()->invalidate();
+
+        $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
+
+        return $this->redirectToRoute('app_events');
+    }
+
+    return $this->redirectToRoute('myprofile');
+}
+
+
+
+//MAJ du Profil
+public function editProfile(Request $request, EntityManagerInterface $em): Response {
+    $user = $this->getUser();
+    $form = $this->createForm(ProfileType::class, $user);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $em->flush();
+        $this->addFlash('success', 'Profil mis à jour avec succès !');
+        return $this->redirectToRoute('myprofile');
+    }
+
+    return $this->render('myprofile.html.twig', [
+        'form' => $form->createView(),
+        'user' => $user,
+    ]);
+}
+
+
 
 
 
 }
 
 
-
- 
-   
 
 ?>
