@@ -24,8 +24,7 @@ class AddressController extends AbstractController
     }
 
     #[Route('/new', name: 'address_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
-    {
+    public function new(Request $request, EntityManagerInterface $em): Response {
         $address = new Address();
         $form = $this->createForm(AddressType::class, $address);
         $form->handleRequest($request);
@@ -43,6 +42,9 @@ class AddressController extends AbstractController
         ]);
     }
 
+
+
+    
     #[Route('/{id}/edit', name: 'address_edit', methods: ['GET', 'POST'])]
     public function edit(Address $address, Request $request, EntityManagerInterface $em): Response
     {
@@ -61,9 +63,11 @@ class AddressController extends AbstractController
         ]);
     }
 
+
+
+
     #[Route('/{id}/delete', name: 'address_delete', methods: ['POST'])]
-    public function delete(Address $address, Request $request, EntityManagerInterface $em): Response
-    {
+    public function delete(Address $address, Request $request, EntityManagerInterface $em): Response {
         if ($this->isCsrfTokenValid('delete'.$address->getId(), $request->request->get('_token'))) {
             $em->remove($address);
             $em->flush();

@@ -10,6 +10,9 @@
         {% if is_granted('ROLE_ADMIN') %}
             <li><a href="{{ path('createCategory') }}">Créer une Catégorie</a></li> 
             <li><a href="{{ path('userAdmin_registration') }}">Créer un Utilisateur Admin </a></li>
+            <li> <a href="{{ path('listCategories') }}"> Listes des Catégories </a> </li>
+
+            <li> <a href="{{ path('listUsers') }}"> Listes des Utilisateurs </a> </li>
         {% endif %}
 
 

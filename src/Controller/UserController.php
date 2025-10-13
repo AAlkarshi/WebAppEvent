@@ -6,6 +6,7 @@ use App\Form\ProfileType;
 use App\Entity\User;
 use App\Repository\EventRepository;
 use App\Entity\Register;
+use App\Entity\Event;
 use App\Entity\Category;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +24,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 class UserController extends AbstractController
@@ -234,8 +235,7 @@ public function registrationAdmin(Request $request, UserPasswordHasherInterface 
 
 /* SUPPRESSION DE COMPTE */
 #[Route('/delete-account', name: 'delete_account', methods: ['POST'])]
-public function deleteAccount(Request $request, EntityManagerInterface $em, TokenStorageInterface $tokenStorage, EventRepository $eventRepository): Response
-{
+public function deleteAccount(Request $request, EntityManagerInterface $em, TokenStorageInterface $tokenStorage, EventRepository $eventRepository): Response {
     $user = $this->getUser();
 
     if (!$user) {
@@ -279,23 +279,57 @@ public function deleteAccount(Request $request, EntityManagerInterface $em, Toke
 
 
 
-//MAJ du Profil
-public function editProfile(Request $request, EntityManagerInterface $em): Response {
-    $user = $this->getUser();
-    $form = $this->createForm(ProfileType::class, $user);
-    $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $em->flush();
-        $this->addFlash('success', 'Profil mis à jour avec succès !');
-        return $this->redirectToRoute('myprofile');
+
+
+//Listes des USERS pour ADMIN UNIQUEMENT
+#[Route('/listUsers', name: 'listUsers', methods: ['POST','GET'])]
+#[IsGranted('ROLE_ADMIN')]
+    public function listUsers(EntityManagerInterface $em): Response {
+        
+        // Récup de tout les users
+        $users = $em->getRepository(User::class)->findAll();
+
+        return $this->render('default/listUsers.html.twig', [
+            'users' => $users,
+        ]);
     }
 
-    return $this->render('myprofile.html.twig', [
-        'form' => $form->createView(),
-        'user' => $user,
-    ]);
-}
+//Pouvoir SUPPRIMER un USER DANS LA LISTE en tant qu'ADMIN uniquement
+ #[Route('/users/{id}/delete', name: 'deleteUser')]
+#[IsGranted('ROLE_ADMIN')]
+    public function deleteUser(User $user, Event $event, EntityManagerInterface $em): Response {
+        
+        // On ne peut pas supprimer soi-même (optionnel)
+        if ($user === $this->getUser()) {
+            $this->addFlash('error', '❌ Vous ne pouvez pas supprimer votre propre compte.');
+            return $this->redirectToRoute('listUsers');
+        }
+
+
+        $events = $em->getRepository(Event::class)->findBy(['createdBy' => $user]);
+        foreach ($events as $event) {
+            // Supprimer d’abord toutes les inscriptions liées à l’événement
+            $registers = $em->getRepository(Register::class)->findBy(['Event' => $event]);
+            foreach ($registers as $register) {
+                $em->remove($register);
+            }
+
+            $em->remove($event);
+        }
+
+         // Supprimer toutes les inscriptions liées
+        $registers = $em->getRepository(Register::class)->findBy(['user' => $user]);
+        foreach ($registers as $register) {
+            $em->remove($register);
+        }
+
+        $em->remove($user);
+        $em->flush();
+
+        $this->addFlash('success', 'Utilisateur supprimé avec succès !');
+        return $this->redirectToRoute('listUsers');
+    }
 
 
 

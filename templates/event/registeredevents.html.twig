@@ -19,11 +19,34 @@
 {% else %}
     <ul>
         {% for reg in registrations %}
-            <li>
-                <strong>{{ reg.event.titleEvent }}</strong> — 
-                {{ reg.event.dateTimeEvent|date('d/m/Y H:i') }}
-                <a href="{{ path('event_unregister', {id: reg.event.id}) }}" class="btn btn-sm btn-danger">Se désinscrire</a>
-            </li>
+            <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px;">
+    <!-- Partie gauche : image et infos -->
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <img src="{{ asset('uploads/avatars/' ~ reg.event.imageEvent) }}" 
+             alt="{{ reg.event.titleEvent }}" 
+             style="height: 130px; width: 130px; object-fit: cover; border-radius: 10px;">
+        <div>
+    <strong>{{ reg.event.titleEvent }}</strong> — {{ reg.event.dateTimeEvent|date('d/m/Y H:i') }} <br>
+        {{ reg.event.nbxParticipant }} / 
+        {% if reg.event.nbxParticipantMax is not null %}
+            {{ reg.event.nbxParticipantMax }}
+        {% else %}
+            Illimité
+        {% endif %} Participants
+    </div>
+
+    </div>
+
+    <!-- Partie droite : bouton -->
+    <div>
+        <a href="{{ path('event_unregister', {id: reg.event.id}) }}" 
+           class="btn btn-danger" 
+           style="height: 130px; width: 130px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold;">
+            Se désinscrire
+        </a>
+    </div>
+</li>
+
         {% endfor %}
     </ul>
 {% endif %}

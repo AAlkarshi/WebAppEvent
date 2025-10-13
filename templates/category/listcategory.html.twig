@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des catégories{% endblock %}
+
+{% block body %}
+<h1>Liste des catégories</h1>
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">
+        {{ message }}
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">
+        {{ message }}
+    </div>
+{% endfor %}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom de la catégorie</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if categories is not empty %}
+            {% for category in categories %}
+                <tr>
+                    <td>{{ category.id }}</td>
+                    <td>{{ category.nameCategory }}</td>
+                    <td>
+                        <a href="{{ path('editCategory', {'id': category.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                        <a href="{{ path('deleteCategory', {'id': category.id}) }}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Voulez-vous vraiment supprimer cette catégorie ?');">
+                           Supprimer
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="3">Aucune catégorie disponible.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<a href="{{ path('createCategory') }}" class="btn btn-success">Ajouter une catégorie</a>
+{% endblock %}

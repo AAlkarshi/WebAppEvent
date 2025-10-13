@@ -30,6 +30,21 @@
             <p><strong>Code Postal : </strong> {{ event.address.getCp() }} </p>
         {% endif %}
 
+        <h3>Participants ({{ activeCount }})</h3>
+
+        <ul>
+            {% for reg in registers %}
+                <li>
+                    {{ reg.user.firstnameUser }} {{ reg.user.lastnameUser }}
+                    {% if not reg.active %}
+                        <span class="text-muted">(désinscrit)</span>
+                    {% endif %}
+                </li>
+            {% else %}
+                <li>Aucun participant pour cet événement.</li>
+            {% endfor %}
+        </ul>
+
        
    
 

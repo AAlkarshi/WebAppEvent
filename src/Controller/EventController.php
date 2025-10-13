@@ -7,10 +7,15 @@ use App\Entity\Register;
 
 use App\Entity\Address;
 
+use Symfony\Bundle\SecurityBundle\Security;
 
+
+
+use Symfony\Component\HttpFoundation\File\File;
 use App\Repository\EventRepository;
 use App\Repository\CategoryRepository;
 use App\Form\EventType;
+use App\Repository\RegisterRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -42,6 +47,9 @@ class EventController extends AbstractController
         $qb = $eventRepository->createQueryBuilder('e')
             ->leftJoin('e.address', 'a')->addSelect('a')
             ->leftJoin('e.category', 'c')->addSelect('c');
+
+
+       
 
         // 🔹 Si une catégorie est sélectionnée, on filtre
         if ($categoryId) {
@@ -94,53 +102,62 @@ class EventController extends AbstractController
 
 
     //CREER MON EVENT
-    #[Route('/events/createmyevent', name: 'createmyevent')]
-public function createMyEvent(Request $request, EventRepository $eventRepository, CategoryRepository $categoryRepository, EntityManagerInterface $em): Response {
-    $event = new Event();
+   #[Route('/events/createmyevent', name: 'createmyevent')]
+    public function createMyEvent(Request $request, EventRepository $eventRepository, Security $security, EntityManagerInterface $em): Response {
+        $event = new Event();
+        $event->setCreatedBy($this->getUser());
+        $event->setNbxParticipant(1); // le créateur est le premier inscrit
 
-    $event->setCreatedBy($this->getUser());
+        $form = $this->createForm(EventType::class, $event);
+        $form->handleRequest($request);
 
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $security->getUser();
 
-    $form = $this->createForm(EventType::class, $event);
-    $form->handleRequest($request);
+            // ✅ Adresse sélectionnée ou nouvelle adresse
+            $address = $form->get('address')->getData();
 
-    if ($form->isSubmitted()) {
-        dump($form->get('dateTime_event')->getData());
-    }
+            // Si l'utilisateur a ajouté une nouvelle adresse via le sous-formulaire
+            if ($form->has('new_address') && $form->get('new_address')->getData()) {
+                $newAddressData = $form->get('new_address')->getData();
+                $address = new Address();
+                $address->setAddress($newAddressData->getAddress())
+                        ->setCity($newAddressData->getCity())
+                        ->setCp($newAddressData->getCp());
+                $em->persist($address);
+            }
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Si des infos pour une nouvelle adresse sont renseignées
-        $newAddressData = [
-            'address' => $form->get('new_address')->getData(),
-            'city' => $form->get('new_city')->getData(),
-            'cp' => $form->get('new_cp')->getData(),
-        ];
-
-        if (!empty($newAddressData['address']) && !empty($newAddressData['city']) && !empty($newAddressData['cp'])) {
-            $address = new Address();
-            $address->setAddress($newAddressData['address'])
-                    ->setCity($newAddressData['city'])
-                    ->setCp($newAddressData['cp']);
-
+            // Lier l'adresse à l'événement
+            $event->setAddress($address);
             
-            $em->persist($address);
-            $event->setAddress($address); // lie l'événement à la nouvelle adresse
-        } else {
-            // Sinon utilise l'adresse sélectionnée
-            $event->setAddress($form->get('address')->getData());
+            // le créateur est le premier inscrit
+            $event->setNbxParticipant(count($event->getRegisters()));
+
+
+            // ✅ Créer une inscription pour le créateur
+            $register = new Register();
+            $register->setEvent($event);
+            $register->setUser($user);
+            $register->setActive(true);
+
+            $event->addRegister($register); // ✅ Ajoute l'inscription à l'événement
+
+            // Maintenant, nbx_participant = 1
+            $event->setNbxParticipant(count($event->getRegisters()));
+
+            $em->persist($event);
+            $em->persist($register);
+            $em->flush();
+
+            $this->addFlash('success', 'Événement créé avec succès !');
+            return $this->redirectToRoute('app_events');
         }
 
-        $em->persist($event);
-        $em->flush();
-
-        $this->addFlash('success', 'Événement créé avec succès !');
-        return $this->redirectToRoute('createmyevent');
+        return $this->render('event/createmyevent.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
-    return $this->render('event/createmyevent.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
 
 
 
@@ -148,64 +165,69 @@ public function createMyEvent(Request $request, EventRepository $eventRepository
     // VOIR EVENT OU JE SUIS INSCRIS
    #[Route('/events/registeredevents', name: 'registeredevents')]
     public function registeredEvents(EntityManagerInterface $em): Response {
-    $user = $this->getUser();
+        $user = $this->getUser();
 
-    $registrations = $em->getRepository(Register::class)->findBy([
-        'user' => $user,
-        'active' => true
-    ]);
+        $registrations = $em->getRepository(Register::class)->findBy([
+            'user' => $user,
+            'active' => true
+        ]);
 
-    return $this->render('event/registeredevents.html.twig', [
-        'registrations' => $registrations,
-    ]);
+        return $this->render('event/registeredevents.html.twig', [
+            'registrations' => $registrations,
+        ]);
 }
 
     
     // S'INSCRIRE UN EVENT
     #[Route('/events/{id}/register', name: 'event_register')]
-public function registerToEvent(Event $event, EntityManagerInterface $em): Response
-{
-    $user = $this->getUser();
+    public function registerToEvent(Event $event, EntityManagerInterface $em, Security $security): Response {
+        $user = $this->getUser();
 
-    // 🚫 Si l'utilisateur n'est pas connecté → redirection vers la page de connexion
-    if (!$user) {
-        return $this->redirectToRoute('app_login');
-    }
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
 
-    // 🚫 Empêche le créateur de s’inscrire à son propre événement
-    if ($event->getCreatedBy() === $user) {
-        $this->addFlash('error', '❌ Vous ne pouvez pas vous inscrire à votre propre événement.');
-    } 
-    else {
-        // 🔍 Vérifie si l’utilisateur est déjà inscrit
+        // Empêche le créateur de s’inscrire à son propre événement
+        if ($event->getCreatedBy() === $user) {
+            $this->addFlash('error', '❌ Vous ne pouvez pas vous inscrire à votre propre événement.');
+            return $this->redirectToRoute('app_events');
+        }
+
+        // Vérifie si l'événement est complet
+        if ($event->getNbxParticipantMax() !== null && $event->getNbxParticipant() >= $event->getNbxParticipantMax()) {
+            $this->addFlash('error', '❌ Cet événement est COMPLET.');
+            return $this->redirectToRoute('app_events');
+        }
+
+        // Vérifie si l’utilisateur est déjà inscrit
         $existing = $em->getRepository(Register::class)->findOneBy([
             'user' => $user,
             'Event' => $event,
         ]);
 
         if ($existing && $existing->isActive()) {
-            // ⚠️ Message affiché directement sur la même page
             $this->addFlash('warning', '⚠️ Vous êtes déjà inscrit à cet événement.');
-        } else {
-            if (!$existing) {
-                $register = new Register();
-                $register->setUser($user);
-                $register->setEvent($event);
-            } else {
-                $register = $existing;
-            }
-
-            $register->setActive(true);
-            $em->persist($register);
-            $em->flush();
-
-            $this->addFlash('success', '🎉 Inscription réussie à l’événement !');
+            return $this->redirectToRoute('app_events');
         }
-    }
 
-    // 👇 Redirection vers la page actuelle (liste des événements)
-    return $this->redirectToRoute('app_events');
+        // Crée l'inscription
+        $register = $existing ?? new Register();
+        $register->setEvent($event);
+        $register->setUser($user);
+        $register->setActive(true);
+
+        // Incrémente le nombre de participants
+        $event->setNbxParticipant($event->getNbxParticipant() + 1);
+
+        $em->persist($register);
+        $em->persist($event);
+        $em->flush();
+
+        $this->addFlash('success', '🎉 Inscription réussie à l’événement !');
+
+        return $this->redirectToRoute('app_events');
 }
+
 
 
 
@@ -218,16 +240,22 @@ public function registerToEvent(Event $event, EntityManagerInterface $em): Respo
     public function unregisterFromEvent(Event $event, EntityManagerInterface $em): Response {
         $user = $this->getUser();
 
-        // Cherche l'inscription correspondante
+        // Recherche l'inscription correspondante
         $register = $em->getRepository(Register::class)->findOneBy([
             'user' => $user,
             'Event' => $event,
         ]);
 
         if ($register) {
-            // Supprime l'inscription de la base de données
+            // Supprime l'inscription
             $em->remove($register);
-            
+
+            // Décrémente le compteur (sans aller en dessous de 1)
+            $currentCount = $event->getNbxParticipant();
+            if ($currentCount > 1) {
+                $event->setNbxParticipant($currentCount - 1);
+            }
+
             $em->flush();
             $this->addFlash('success', '❌ Vous vous êtes désinscrit de l’événement.');
         } else {
@@ -236,6 +264,7 @@ public function registerToEvent(Event $event, EntityManagerInterface $em): Respo
 
         return $this->redirectToRoute('registeredevents');
 }
+
 
 
 
@@ -267,15 +296,29 @@ public function registerToEvent(Event $event, EntityManagerInterface $em): Respo
 // MODIFIER MON EVENT
 #[Route('/event/{id}/edit', name: 'editmyevent')]
 public function editmyevent(Event $event, Request $request, EntityManagerInterface $em): Response {
+
     if ($event->getCreatedBy() !== $this->getUser()) {
         throw $this->createAccessDeniedException("Vous n'êtes pas autorisé à modifier cet événement.");
     }
-
 
     $form = $this->createForm(EventType::class, $event);
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
+        /** @var UploadedFile $imageFile */
+        $imageFile = $form->get('image_event')->getData();
+
+        if ($imageFile) {
+            $newFilename = uniqid().'.'.$imageFile->guessExtension();
+            $imageFile->move(
+                $this->getParameter('avatars_directory'),
+                $newFilename
+            );
+            $event->setImageEvent($newFilename);
+        }
+        // Si aucun nouveau fichier, garder l'image existante (déjà en string)
+        // $event->getImageEvent() contient déjà 'cinema.jpg'
+
         $em->flush();
         $this->addFlash('success', 'Événement modifié avec succès.');
         return $this->redirectToRoute('app_events');
@@ -284,8 +327,11 @@ public function editmyevent(Event $event, Request $request, EntityManagerInterfa
     return $this->render('event/editevent.html.twig', [
         'form' => $form->createView(),
         'event' => $event,
+        'currentImage' => $event->getImageEvent(), // on passe l'image actuelle au template
     ]);
 }
+
+
 
 // SUPP MON EVENT
 #[Route('/event/{id}/delete', name: 'deletemyevent')]
@@ -328,12 +374,23 @@ public function viewMyEvent(Event $event): Response {
 
 //VOIR LES NIFOS D'UN EVENT AFIN DE S'Y INFORMER
 #[Route('/events/{id}', name: 'viewthisevent', methods: ['GET'])]
-public function viewthisEvent(Event $event): Response {
+public function viewthisEvent(Event $event , RegisterRepository $registerRepository): Response {
 
     $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+    // Récupère uniquement les inscriptions actives
+    $activeRegisters = array_filter(
+        $event->getRegisters()->toArray(),
+        fn($reg) => $reg->isActive()
+    );
+
+     // On compte uniquement les inscrits actifs
+    $activeCount = $registerRepository->count(['Event' => $event, 'active' => true]);
+
     return $this->render('event/viewthisevent.html.twig', [
         'event' => $event,
+        'registers' => $activeRegisters,
+        'activeCount' => $activeCount,
     ]);
 }
 

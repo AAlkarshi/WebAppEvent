@@ -5,6 +5,10 @@
 {% block body %}
     <h1>Modifier l’événement</h1>
 
+    {% if currentImage %}
+    <img src="{{ asset('uploads/avatars/' ~ currentImage) }}" alt="Image de l'événement" style="max-width:200px;">
+{% endif %}
+
     {{ form_start(form) }}
         {{ form_widget(form) }}
         <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>

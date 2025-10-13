@@ -3,6 +3,7 @@
 {% block title %}{{ event.titleEvent }}{% endblock %}
 
 {% block body %}
+
     <h1>{{ event.titleEvent }}</h1>
     <p><strong>Date :</strong> {{ event.dateTimeEvent|date('d/m/Y H:i') }}</p>
     <p><strong>Description :</strong> {{ event.descriptionEvent }}</p>

@@ -14,7 +14,20 @@ Mes événements créés
     <ul>
         {% for event in events %}
             <li>
-                {{ event.titleEvent }} — {{ event.dateTimeEvent|date('d/m/Y H:i') }}
+               <img src="{{ asset('uploads/avatars/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}" style="max-width:200px;">
+                
+                {{ event.titleEvent }} — {{ event.dateTimeEvent|date('d/m/Y H:i') }} <br>
+                {{ event.category.nameCategory }} <br>
+                {{ event.address.city }} <br>
+                {{ event.descriptionEvent }} <br>
+                {{ event.dateTimeEvent|date('d/m/Y H:i') }} <br>
+
+                {{ event.nbxParticipant }}   / {{ event.nbxParticipantMax }} Participants
+
+                
+
+
+               
                 
                 <a href="{{ path('view_myevent', {id: event.id}) }}"> Voir </a>
 

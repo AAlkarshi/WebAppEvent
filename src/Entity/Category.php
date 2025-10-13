@@ -24,7 +24,7 @@ class Category
     /**
      * @var Collection<int, Event>
      */
-    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'category')]
+    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'category', cascade: ['remove'])]
     private Collection $events;
 
     /* RELATION  Chaque catégorie est liée à un seul User */

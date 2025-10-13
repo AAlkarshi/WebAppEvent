@@ -43,7 +43,7 @@ class Event
     private ?int $duration_event = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $nbx_participant = null;
+    private ?int $nbx_participant = 1;  // 1 par DEF
 
     #[ORM\Column(nullable: true)]
     private ?int $nbx_participant_max = null;
@@ -61,16 +61,18 @@ class Event
      * @var Collection<int, Register>
      */
     /* Plusieurs inscriptions (Register) peuvent concerner le MM EVENT */
-    #[ORM\OneToMany(targetEntity: Register::class, mappedBy: 'Event')]
+    #[ORM\OneToMany(targetEntity: Register::class, mappedBy: 'Event', cascade: ['remove'], orphanRemoval: true )]
     private Collection $registers;
 
-    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\ManyToOne(inversedBy: 'events', cascade: ['persist'] )]
     #[ORM\JoinColumn(nullable: false)]
     private ?Address $address = null;
 
     public function __construct()
     {
         $this->registers = new ArrayCollection();
+        $this->nbx_participant = 1; // PAR DEF  le créateur compte comme participant
+
     }
 
     public function getId(): ?int
@@ -237,4 +239,21 @@ class Event
 
         return $this;
     }
+
+
+
+    public function getActiveParticipants(): array {
+        return array_filter(
+            $this->registers->toArray(),
+            fn(Register $register) => $register->isActive()
+        );
+}
+
+
+    public function countActiveParticipants(): int {
+        return count($this->getActiveParticipants());
+    }
+
+
+
 }

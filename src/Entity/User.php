@@ -65,7 +65,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Register>
      */
     /* Plusieurs inscriptions (Register) peuvent concerner le même utilisateur. */
-    #[ORM\OneToMany(targetEntity: Register::class, mappedBy: 'user')]
+    /* Avec orphanRemoval, Symfony/Doctrine supprimera automatiquement tous les Register liés lorsque tu supprimes l'USER */
+    #[ORM\OneToMany(targetEntity: Register::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $registers;
 
     /**

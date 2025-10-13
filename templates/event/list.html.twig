@@ -154,14 +154,20 @@ Accueil
                     </button>
                         <br>
                         
-                    <button>
-                        <a href="{{ path('event_register', {id: event.id}) }}" class="btn btn-primary">
-                            S'inscrire à cet événement
-                        </a>
-                    </button>
+                     {% if event.nbxParticipantMax is not null and event.nbxParticipant >= event.nbxParticipantMax %}
+                            <span style="color:green; font-weight:bold;">COMPLET</span>
+                        {% else %}
+                       <button>
+                             <a href="{{ path('event_register', {id: event.id}) }}" class="btn btn-primary">S'inscrire</a>
+                       </button>
+                             {% endif %}
                         {% else %}
                             <p><em>Connectez-vous pour vous inscrire</em></p>
                         {% endif %}
+
+                    
+                      
+
 
 
                     </div>

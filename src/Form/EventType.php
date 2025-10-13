@@ -64,11 +64,11 @@ class EventType extends AbstractType
                 'required' => false,
             ])
 
-            ->add('nbx_participant', IntegerType::class, [
+          /*  ->add('nbx_participant', IntegerType::class, [
                 'label' => 'Nombre de participants',
                 'required' => false,
             ])
-
+*/
             ->add('nbx_participant_max', IntegerType::class, [
                 'label' => 'Nombre maximum de participants',
                 'required' => false,
@@ -79,20 +79,9 @@ class EventType extends AbstractType
                 'label' => 'Catégorie',
                 'placeholder' => 'Choisir une catégorie',
             ])
-             
-            ->add('new_address', TextType::class, [
+             // Tout ce qui est ici sera rajouté dans une table address en BDD
+            ->add('address', AddressType::class, [
                 'label' => 'Nouvelle adresse',
-                'mapped' => false,
-                'required' => false,
-            ])
-            ->add('new_city', TextType::class, [
-                'label' => 'Ville',
-                'mapped' => false,
-                'required' => false,
-            ])
-            ->add('new_cp', IntegerType::class, [
-                'label' => 'Code postal',
-                'mapped' => false,
                 'required' => false,
             ]);
 
