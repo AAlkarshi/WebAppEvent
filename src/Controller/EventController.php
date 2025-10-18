@@ -10,6 +10,8 @@ use App\Entity\Address;
 use Symfony\Bundle\SecurityBundle\Security;
 
 
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 use Symfony\Component\HttpFoundation\File\File;
 use App\Repository\EventRepository;
@@ -25,6 +27,8 @@ use Doctrine\ORM\EntityManagerInterface;
 
 //PAGINATION
 use Knp\Component\Pager\PaginatorInterface;
+
+
 
 class EventController extends AbstractController
 {
@@ -85,7 +89,7 @@ class EventController extends AbstractController
         $pagination = $paginator->paginate(
             $qb, // Query ou QueryBuilder
             $request->query->getInt('page', 1), // Numéro de page
-            8 // Nombre d'événements par page
+            8 // Nbx d'évent par page
         );
 
         // 🔹 Rendu Twig
@@ -101,62 +105,101 @@ class EventController extends AbstractController
 }
 
 
-    //CREER MON EVENT
-   #[Route('/events/createmyevent', name: 'createmyevent')]
-    public function createMyEvent(Request $request, EventRepository $eventRepository, Security $security, EntityManagerInterface $em): Response {
-        $event = new Event();
-        $event->setCreatedBy($this->getUser());
-        $event->setNbxParticipant(1); // le créateur est le premier inscrit
+    // SUPP d'un EVENT par USER ADMIN
+    #[Route('/event/delete/{id}', name: 'app_event_delete', methods: ['POST'])]
+    public function delete(Request $request, Event $event, EntityManagerInterface $em): Response {
+        // ✅ Vérifie que seul l'Admin peut supprimer
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $form = $this->createForm(EventType::class, $event);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $security->getUser();
-
-            // ✅ Adresse sélectionnée ou nouvelle adresse
-            $address = $form->get('address')->getData();
-
-            // Si l'utilisateur a ajouté une nouvelle adresse via le sous-formulaire
-            if ($form->has('new_address') && $form->get('new_address')->getData()) {
-                $newAddressData = $form->get('new_address')->getData();
-                $address = new Address();
-                $address->setAddress($newAddressData->getAddress())
-                        ->setCity($newAddressData->getCity())
-                        ->setCp($newAddressData->getCp());
-                $em->persist($address);
-            }
-
-            // Lier l'adresse à l'événement
-            $event->setAddress($address);
-            
-            // le créateur est le premier inscrit
-            $event->setNbxParticipant(count($event->getRegisters()));
-
-
-            // ✅ Créer une inscription pour le créateur
-            $register = new Register();
-            $register->setEvent($event);
-            $register->setUser($user);
-            $register->setActive(true);
-
-            $event->addRegister($register); // ✅ Ajoute l'inscription à l'événement
-
-            // Maintenant, nbx_participant = 1
-            $event->setNbxParticipant(count($event->getRegisters()));
-
-            $em->persist($event);
-            $em->persist($register);
+        // ✅ Protection CSRF
+        if ($this->isCsrfTokenValid('delete_event_' . $event->getId(), $request->request->get('_token'))) {
+            $em->remove($event);
             $em->flush();
 
-            $this->addFlash('success', 'Événement créé avec succès !');
-            return $this->redirectToRoute('app_events');
+            $this->addFlash('success', 'L\'événement a bien été supprimé.');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
         }
 
-        return $this->render('event/createmyevent.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return $this->redirectToRoute('app_events');
     }
+
+
+    //CREER MON EVENT
+   #[Route('/events/createmyevent', name: 'createmyevent')]
+public function createMyEvent(Request $request, EventRepository $eventRepository, Security $security, EntityManagerInterface $em): Response {
+    $event = new Event();
+    $event->setCreatedBy($this->getUser());
+    $event->setNbxParticipant(1); // valeur par DEF pour l'affichage, mais on vérifiera après la saisie
+
+    $form = $this->createForm(EventType::class, $event);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+
+        // Récup les valeurs saisies par l'USER
+        $nbxParticipant = $form->get('nbx_participant')->getData();
+        $nbxParticipantMax = $form->get('nbx_participant_max')->getData();
+
+        //  Vérifie si nbxuser est pas > à nbxuserMAX
+        if ($event->getNbxParticipant() > $event->getNbxParticipantMax()) {
+            $this->addFlash('error', '⚠️ Le nombre de participants ne peut pas dépasser le nombre maximum autorisé.');
+            return $this->redirectToRoute('createmyevent');
+        }
+
+        $user = $security->getUser();
+
+        // Gestion de l'image
+        $imageFile = $form->get('image_event')->getData();
+        if ($imageFile) {
+            $newFilename = uniqid().'.'.$imageFile->guessExtension();
+            $imageFile->move(
+                $this->getParameter('event_images_directory'),
+                $newFilename
+            );
+            $event->setImageEvent($newFilename);
+        } else {
+            $category = $event->getCategory() ? strtolower($event->getCategory()->getNameCategory()) : 'default';
+            $defaultImage = match ($category) {
+                'jeux vidéo' => 'jeuxvideo.jpg',
+                'jeux de société' => 'jeuxdesociete.jpg',
+                'course' => 'course.jpg',
+                'promenade' => 'promenade.jpg',
+                'restauration' => 'restauration.jpg',
+                'sport' => 'sport.jpg',
+                'poker' => 'poker.jpg',
+                'cinéma' => 'cinema.jpg',
+                'concert' => 'concert.jpg',
+                default => 'autreévènement.jpg',
+            };
+            $event->setImageEvent($defaultImage);
+        }
+
+        // Récup les valeurs saisies par l'USER pr Adresse
+        $address = $form->get('address')->getData();
+        $event->setAddress($address);
+
+        // Créateur s'inscrit à son évéent 
+        $register = new Register();
+        $register->setEvent($event);
+        $register->setUser($user);
+        $register->setActive(true);
+
+        $event->addRegister($register);
+        $event->setNbxParticipant(count($event->getRegisters()));
+
+        $em->persist($event);
+        $em->persist($register);
+        $em->flush();
+
+        $this->addFlash('success', '🎉 Événement créé avec succès ! Vous êtes automatiquement inscrit.');
+        return $this->redirectToRoute('app_events');
+    }
+
+    return $this->render('event/createmyevent.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 
 
 
@@ -164,18 +207,31 @@ class EventController extends AbstractController
 
     // VOIR EVENT OU JE SUIS INSCRIS
    #[Route('/events/registeredevents', name: 'registeredevents')]
-    public function registeredEvents(EntityManagerInterface $em): Response {
-        $user = $this->getUser();
+    public function registeredEvents(EntityManagerInterface $em, PaginatorInterface $paginator, Request $request): Response
+{
+    $user = $this->getUser();
 
-        $registrations = $em->getRepository(Register::class)->findBy([
-            'user' => $user,
-            'active' => true
-        ]);
+    $queryBuilder = $em->getRepository(Register::class)
+                       ->createQueryBuilder('r')
+                       ->where('r.user = :user')
+                       ->andWhere('r.active = true')
+                       ->setParameter('user', $user)
+                       ->orderBy('r.id', 'DESC');
 
-        return $this->render('event/registeredevents.html.twig', [
-            'registrations' => $registrations,
-        ]);
+    $pagination = $paginator->paginate(
+        $queryBuilder,              
+        $request->query->getInt('page', 1), // numéro de page
+        3                          // nombre d’éléments par page
+    );
+
+    return $this->render('event/registeredevents.html.twig', [
+        'registrations' => $pagination,
+    ]);
 }
+
+
+
+
 
     
     // S'INSCRIRE UN EVENT
@@ -272,22 +328,25 @@ class EventController extends AbstractController
 
 // LISTE DES MES EVENEMNTS QUE J'AI CREER
     #[Route('/myevents', name: 'myevents')]
-        public function myEvents(EventRepository $eventRepository): Response {
+    public function myEvents(EventRepository $eventRepository, Request $request, PaginatorInterface $paginator): Response {
         $user = $this->getUser();
 
-        // 🔹 Récupère tous les événements créés par l'utilisateur
-        $events = $eventRepository->findBy([
-            //Celui qui stocke le id de user qui l'a créer en BDD
-            'createdBy' => $user, 
-        ], [
-            'dateTime_event' => 'ASC' 
-        ]);
+        $query = $eventRepository->createQueryBuilder('e')
+            ->where('e.createdBy = :user')
+            ->setParameter('user', $user)
+            ->orderBy('e.dateTime_event', 'ASC')
+            ->getQuery();
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1), // page actuelle
+            3 // nb d'événements par page
+        );
 
         return $this->render('event/myevents.html.twig', [
-            'events' => $events,
+            'pagination' => $pagination,
         ]);
-}
-
+    }
 
 
 
@@ -296,7 +355,6 @@ class EventController extends AbstractController
 // MODIFIER MON EVENT
 #[Route('/event/{id}/edit', name: 'editmyevent')]
 public function editmyevent(Event $event, Request $request, EntityManagerInterface $em): Response {
-
     if ($event->getCreatedBy() !== $this->getUser()) {
         throw $this->createAccessDeniedException("Vous n'êtes pas autorisé à modifier cet événement.");
     }
@@ -305,31 +363,38 @@ public function editmyevent(Event $event, Request $request, EntityManagerInterfa
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
-        /** @var UploadedFile $imageFile */
-        $imageFile = $form->get('image_event')->getData();
 
-        if ($imageFile) {
-            $newFilename = uniqid().'.'.$imageFile->guessExtension();
-            $imageFile->move(
-                $this->getParameter('avatars_directory'),
-                $newFilename
-            );
-            $event->setImageEvent($newFilename);
-        }
-        // Si aucun nouveau fichier, garder l'image existante (déjà en string)
-        // $event->getImageEvent() contient déjà 'cinema.jpg'
+    $nbxParticipantMax = $form->get('nbx_participant_max')->getData(); // valeur saisie
+    $nbxParticipantActuel = $event->getNbxParticipant(); // nombre déjà inscrit
 
-        $em->flush();
-        $this->addFlash('success', 'Événement modifié avec succès.');
-        return $this->redirectToRoute('app_events');
+    if ($nbxParticipantActuel > $nbxParticipantMax) {
+        $this->addFlash('error', '⚠️ Le nombre de participants ne peut pas dépasser le nombre maximum autorisé.');
+        return $this->redirectToRoute('editmyevent', ['id' => $event->getId()]);
     }
+
+    /** @var UploadedFile $imageFile */
+    $imageFile = $form->get('image_event')->getData();
+    if ($imageFile) {
+        $newFilename = uniqid().'.'.$imageFile->guessExtension();
+        $imageFile->move(
+            $this->getParameter('avatars_directory'),
+            $newFilename
+        );
+        $event->setImageEvent($newFilename);
+    }
+
+    $em->flush();
+    $this->addFlash('success', 'Événement modifié avec succès.');
+    return $this->redirectToRoute('app_events');
+}
 
     return $this->render('event/editevent.html.twig', [
         'form' => $form->createView(),
         'event' => $event,
-        'currentImage' => $event->getImageEvent(), // on passe l'image actuelle au template
+        'currentImage' => $event->getImageEvent(),
     ]);
 }
+
 
 
 
@@ -374,9 +439,11 @@ public function viewMyEvent(Event $event): Response {
 
 //VOIR LES NIFOS D'UN EVENT AFIN DE S'Y INFORMER
 #[Route('/events/{id}', name: 'viewthisevent', methods: ['GET'])]
-public function viewthisEvent(Event $event , RegisterRepository $registerRepository): Response {
-
+public function viewthisEvent(Event $event, RegisterRepository $registerRepository, Security $security): Response
+{
     $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+    $user = $security->getUser();
 
     // Récupère uniquement les inscriptions actives
     $activeRegisters = array_filter(
@@ -384,16 +451,25 @@ public function viewthisEvent(Event $event , RegisterRepository $registerReposit
         fn($reg) => $reg->isActive()
     );
 
-     // On compte uniquement les inscrits actifs
+    // On compte uniquement les inscrits actifs
     $activeCount = $registerRepository->count(['Event' => $event, 'active' => true]);
+
+    // Vérifie si l'utilisateur courant est inscrit
+    $isRegistered = false;
+    foreach ($activeRegisters as $reg) {
+        if ($reg->getUser() === $user) {
+            $isRegistered = true;
+            break;
+        }
+    }
 
     return $this->render('event/viewthisevent.html.twig', [
         'event' => $event,
         'registers' => $activeRegisters,
         'activeCount' => $activeCount,
+        'isRegistered' => $isRegistered,
     ]);
 }
-
 
 
 }

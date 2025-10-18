@@ -9,33 +9,29 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class DefaultController extends AbstractController {
-    //Page ACCUEIL
-    #[Route('/' , name: 'default_home', methods: ['GET'])]
-    public function home(EventRepository $event_repository) {
-
-        #Recupérer les 3 derniers événements
-        $events = $event_repository->findBy([], [], 3);
-
-        return $this->render('default/home.html.twig', [
-            'events' => $events, #Je passe la variable events à Twig
-        ]);
+    
+    #[Route('/a-propos', name: 'about')]
+    public function about(): Response
+    {
+        return $this->render('static/about.html.twig');
     }
 
+    #[Route('/mentions-legales', name: 'mentions_legales')]
+    public function mentionsLegales(): Response
+    {
+        return $this->render('static/mentions_legales.html.twig');
+    }
 
-   
+    #[Route('/confidentialite', name: 'confidentialite')]
+    public function confidentialite(): Response
+    {
+        return $this->render('static/confidentialite.html.twig');
+    }
 
-
-    /**
-     * page CATEGORIES DES EVENTS
-     * ex : https://localhost:8000/categorie/1
-     */
-    #[Route('/categorie/{id}' , name: 'default_category', methods: ['GET'])]
-    public function category($id , CategoryRepository $categoryRepository) {
-        #return new Response("<h1>Catégorie : $type </h1>");
-        return $this->render('default/category.html.twig' ,
-            [
-                'category' => $category
-            ]);
+    #[Route('/cgu', name: 'cgu')]
+    public function cgu(): Response
+    {
+        return $this->render('static/cgu.html.twig');
     }
 
 

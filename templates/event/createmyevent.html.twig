@@ -3,42 +3,191 @@
 {% block title %}Créer un événement{% endblock %}
 
 {% block body %}
-<section class="create-event">
-    <h1>Créer un nouvel événement</h1>
-
-    {% for message in app.flashes('success') %}
-        <div class="flash-success">{{ message }}</div>
-    {% endfor %}
-
-<!-- Message d’erreur visuel dans le formulaire -->
-    {% if form.dateTime_event.vars.errors|length > 0 %}
-    <div style="color: red; font-style: italic; margin-top: 5px;">
-        {{ form_errors(form.dateTime_event) }}
+<section class="event-container">
+    <!-- COLONNE GAUCHE -->
+    <div class="ColonneGauche">
+        <h2>Créer un nouvel événement</h2>
+        <h5>Remplissez le formulaire pour organiser votre événement</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-envelope"></i>
+            <p>alkarshi.abdullrahman@gmail.com</p>
+        </div>
     </div>
-{% endif %}
+
+    <!-- COLONNE DROITE -->
+    <div class="event-grid">
+        <div class="profile-container">
+            <h1>Nouvel événement</h1>
+
+            {% for message in app.flashes('success') %}
+                <div class="flash-success">{{ message }}</div>
+            {% endfor %}
 
 
-    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
-        {{ form_widget(form) }}
-        <button type="submit" class="btn">Créer</button>
-    {{ form_end(form) }}
+            {% for message in app.flashes('error') %}
+                <div class="flash-error">{{ message }}</div>
+            {% endfor %}
+
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'style':'display:flex;flex-direction:column;gap:15px;width:100%;'}}) }}
+
+                {# Avatar optionnel #}
+                <div class="profile-picture">
+                    <label for="{{ form.image_event.vars.id }}" class="profile-upload">
+                        {{ form_widget(form.image_event) }}
+                    </label>
+                </div>
+
+                {{ form_row(form.title_event) }}
+                {{ form_row(form.description_event) }}
+                {{ form_row(form.dateTime_event) }}
+                {{ form_row(form.duration_event) }}
+                {{ form_row(form.nbx_participant) }}
+                {{ form_row(form.nbx_participant_max) }}
+                {{ form_row(form.category) }}
+                
+                {# Champ Adresse avec label unique "Adresse" #}
+               {{ form_row(form.address) }} {# affichera un seul label "Adresse" #}
+
+
+                <div class="form-actions" style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-submit">Créer</button>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
 </section>
 
+
 <style>
-.create-event {
-    width: 50%;
-    margin: 40px auto;
-    background: #f9f9f9;
+/* --- CONTENEUR GLOBAL --- */
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
     padding: 20px;
-    border-radius: 10px;
+    box-sizing: border-box;
 }
-.btn {
-    background: #005791;
+
+/* --- COLONNE GAUCHE --- */
+.ColonneGauche {
+    background-color: #005791;
+    width: 40%;
+    padding: 50px 30px;
+    border-radius: 10px;
     color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.ColonneGauche h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.ColonneGauche h5 {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+/* --- COLONNE DROITE --- */
+.event-grid {
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- FORMULAIRE --- */
+.profile-container {
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+.profile-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* --- CHAMPS DE FORMULAIRE --- */
+.profile-container form label {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.profile-container form input,
+.profile-container form textarea,
+.profile-container form select {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* --- BOUTON --- */
+.btn-submit {
+    background-color: #005791;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.1rem;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #00406a;
+}
+
+/* --- MESSAGES FLASH --- */
+.flash-success {
+    color: green;
+    font-weight: bold;
+    text-align: center;
+}
+
+.flash-error {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .event-container {
+        flex-direction: column;
+        height: auto;
+        justify-content: center;
+    }
+    .ColonneGauche, .event-grid {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .profile-container h1 {
+        font-size: 1.8rem;
+    }
+    .ColonneGauche h2 {
+        font-size: 1.8rem;
+    }
 }
 </style>
 {% endblock %}

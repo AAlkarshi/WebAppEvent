@@ -1,56 +1,166 @@
-<!-- HTML -->
 <nav class="navbar">
-    <img src="{{ asset('Logo.png') }}" height="120px;">
-    <div class="logo">Événements+</div>
-    <ul class="nav-links">
-        <li><a href="{{ path('app_events') }}">Voir tous les événements</a></li>
+    <div class="navbar-left">
+       <!-- <img src="{{ asset('Logo.png') }}" alt="Logo" class="logo-img"> -->
+       <h3 style="font-family: Quicksand;"> Eventify </h3>
+    </div>
 
-        
+    <!-- Icône du menu burger -->
+    <div class="burger" id="burger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Liens de navigation -->
+    <ul class="nav-links" id="nav-links" style="font-family: Quicksand;">
+        <li><a href="{{ path('app_events') }}">Voir tous les événements</a></li>
 
         {% if is_granted('ROLE_ADMIN') %}
             <li><a href="{{ path('createCategory') }}">Créer une Catégorie</a></li> 
-            <li><a href="{{ path('userAdmin_registration') }}">Créer un Utilisateur Admin </a></li>
-            <li> <a href="{{ path('listCategories') }}"> Listes des Catégories </a> </li>
-
-            <li> <a href="{{ path('listUsers') }}"> Listes des Utilisateurs </a> </li>
+            <li><a href="{{ path('userAdmin_registration') }}">Créer un Utilisateur Admin</a></li>
+            <li><a href="{{ path('listCategories') }}">Listes des Catégories</a></li>
+            <li><a href="{{ path('listUsers') }}">Listes des Utilisateurs</a></li>
         {% endif %}
 
+        {% if app.user %}
+            <li><a href="{{ path('myevents') }}">Mes événements</a></li>
+            <li><a href="{{ path('registeredevents') }}">Événements Inscrits</a></li>
+            <li><a href="{{ path('createmyevent') }}">Créer mon événement</a></li>
+            <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
+            <li>
+                <a href="{{ path('logout') }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                   Déconnexion
+                </a>
+                <form id="logout-form" action="{{ path('logout') }}" method="POST" style="display:none;"></form>
+            </li>
+        {% else %}
+            <li><a href="{{ path('user_registration') }}">Inscription</a></li>
+            <li><a href="{{ path('login') }}">Connexion</a></li>
+        {% endif %}
 
-         {% if app.user %}
-
-
-        <li> <a href="{{ path('myevents') }}">Mes événements </a></li>
-
-
-        <li><a href="{{ path('registeredevents') }}"> Evénements Inscrits </a></li>
-
-        <li><a href="{{ path('createmyevent') }}">Créer mon événement  </a></li>
-        
-        <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
-
-
-        <!-- <li><a href="{{ path('address_new') }}">Ajouter une Adresse pour mon événement </a></li>  -->
-
-
-
-
-
-       
-
-
-        <li>
-            <a href="{{ path('logout') }}"
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-               Déconnexion
-            </a>
-            <form id="logout-form" action="{{ path('logout') }}" method="POST" style="display:none;"></form>
-        </li>
-    {% else %}
-        <li><a href="{{ path('user_registration') }}">Inscription</a></li>
-        <li><a href="{{ path('login') }}">Connexion</a></li>
-    {% endif %}
-
-
-        <li><a href="#">Contact</a></li>
+      <!--  <li><a href="#">Contact</a></li> -->
     </ul>
+
+
 </nav>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+    
+<style>
+/* --- NAVBAR --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: grey;
+    color: white;
+    padding: 10px 20px;
+}
+
+.logo-img {
+    height: 70px;
+    border-radius: 50%;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+/* --- LIENS NAV --- */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links li a:hover {
+    color: #00aaff;
+}
+
+/* --- MENU BURGER --- */
+.burger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 5px;
+}
+
+.burger span {
+    width: 25px;
+    height: 3px;
+    background: white;
+    border-radius: 3px;
+    transition: all 0.3s;
+}
+
+/* --- ANIMATION BURGER --- */
+.burger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+.burger.open span:nth-child(2) {
+    opacity: 0;
+}
+.burger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .burger {
+        display: flex;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background: #1d1f20;
+        position: absolute;
+        top: 100px;
+        left: 0;
+        padding: 20px 0;
+        text-align: center;
+        border-top: 1px solid #333;
+        z-index: 1000;
+    }
+
+    .nav-links.active {
+        display: flex;
+        animation: slideDown 0.3s ease forwards;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nav-links li {
+        margin: 10px 0;
+    }
+}
+</style>

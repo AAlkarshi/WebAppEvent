@@ -1,53 +1,165 @@
-{% extends 'base.html.twig' %}
+{% extends "base.html.twig" %}
+
 {% block title %}Mes événements inscrits{% endblock %}
 
 {% block body %}
-<h1>🎟️ Mes événements inscrits</h1>
+<section class="events-container">
+    <h2>🎟️ Mes événements inscrits</h2>
 
-{% for message in app.flashes('success') %}
-    <div class="alert alert-success">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('info') %}
-    <div class="alert alert-info">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <div class="alert alert-danger">{{ message }}</div>
-{% endfor %}
-
-{% if registrations is empty %}
-    <p>Aucun événement pour le moment.</p>
-{% else %}
-    <ul>
-        {% for reg in registrations %}
-            <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px;">
-    <!-- Partie gauche : image et infos -->
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <img src="{{ asset('uploads/avatars/' ~ reg.event.imageEvent) }}" 
-             alt="{{ reg.event.titleEvent }}" 
-             style="height: 130px; width: 130px; object-fit: cover; border-radius: 10px;">
-        <div>
-    <strong>{{ reg.event.titleEvent }}</strong> — {{ reg.event.dateTimeEvent|date('d/m/Y H:i') }} <br>
-        {{ reg.event.nbxParticipant }} / 
-        {% if reg.event.nbxParticipantMax is not null %}
-            {{ reg.event.nbxParticipantMax }}
-        {% else %}
-            Illimité
-        {% endif %} Participants
-    </div>
-
-    </div>
-
-    <!-- Partie droite : bouton -->
-    <div>
-        <a href="{{ path('event_unregister', {id: reg.event.id}) }}" 
-           class="btn btn-danger" 
-           style="height: 130px; width: 130px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold;">
-            Se désinscrire
-        </a>
-    </div>
-</li>
-
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">{{ message }}</div>
         {% endfor %}
-    </ul>
-{% endif %}
+    {% endfor %}
+
+    {% if registrations.items is empty %}
+        <p>Vous n’êtes inscrit à aucun événement pour le moment.</p>
+    {% else %}
+        <p>{{ registrations.totalItemCount }} événement{{ registrations.totalItemCount > 1 ? 's' : '' }} trouvé{{ registrations.totalItemCount > 1 ? 's' : '' }}.</p>
+
+        <div class="events-grid">
+            {% for reg in registrations %}
+                <div class="event-card">
+                    <div class="event-image-wrapper">
+                        {% if reg.event.imageEvent %}
+                            <img src="{{ asset('uploads/events/' ~ reg.event.imageEvent) }}" alt="{{ reg.event.titleEvent }}">
+                        {% else %}
+                            <img src="{{ asset('uploads/events/autreévènement.jpg') }}" alt="Image par défaut">
+                        {% endif %}
+                    </div>
+
+                    <div class="event-info">
+                        <h3>{{ reg.event.titleEvent }}</h3>
+
+                        {% if reg.event.category %}
+                            <p><strong>Catégorie :</strong> {{ reg.event.category.nameCategory }}</p>
+                        {% endif %}
+
+                        {% if reg.event.address %}
+                            <p><strong>Adresse :</strong> {{ reg.event.address.city }}
+                                {% if reg.event.address.address %}, {{ reg.event.address.address }}{% endif %}
+                            </p>
+                        {% endif %}
+
+                        <p><strong>Date :</strong> {{ reg.event.dateTimeEvent|date('d/m/Y H:i') }}</p>
+
+                        {% if reg.event.descriptionEvent %}
+                            <p>{{ reg.event.descriptionEvent }}</p>
+                        {% endif %}
+
+                        <p><strong>Participants :</strong>
+                            {{ reg.event.nbxParticipant }} /
+                            {{ reg.event.nbxParticipantMax is not empty ? reg.event.nbxParticipantMax : 'Illimité' }}
+                        </p>
+
+                       <div class="event-actions">
+                            {% if reg.event.createdBy == app.user %}
+                                <a href="{{ path('view_myevent', {id: reg.event.id}) }}" class="btn-submit">Voir</a>
+                            {% endif %}
+                            <a href="{{ path('event_unregister', {id: reg.event.id}) }}" class="btn-submit btn-danger"
+                            onclick="return confirm('Voulez-vous vraiment vous désinscrire de cet événement ?');">
+                                Se désinscrire
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {{ knp_pagination_render(registrations) }}
+        </div>
+    {% endif %}
+</section>
+
+<style>
+.events-container {
+    padding: 20px;
+}
+
+.events-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* --- GRILLE D'ÉVÉNEMENTS --- */
+.events-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* --- CARTE ÉVÉNEMENT --- */
+.event-card {
+    display: flex;
+    background-color: #f8f8f8;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.event-image-wrapper {
+    width: 250px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.event-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.event-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.event-info h3 {
+    margin: 0;
+    color: #005791;
+}
+
+.event-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-submit {
+    background-color: #005791;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-submit:hover {
+    background-color: #003f66;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .event-card {
+        flex-direction: column;
+    }
+
+    .event-image-wrapper {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
 {% endblock %}

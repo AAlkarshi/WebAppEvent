@@ -3,18 +3,166 @@
 {% block title %}{{ event.titleEvent }}{% endblock %}
 
 {% block body %}
+<section class="event-container">
+    <!-- COLONNE GAUCHE : IMAGE DE L'ÉVÉNEMENT -->
+    <div class="ColonneGauche">
+        {% if event.imageEvent %}
+            <img src="{{ asset('uploads/events/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}" class="event-image">
+        {% else %}
+            <img src="{{ asset('uploads/events/default.png') }}" alt="Image par défaut" class="event-image">
+        {% endif %}
+    </div>
 
-    <h1>{{ event.titleEvent }}</h1>
-    <p><strong>Date :</strong> {{ event.dateTimeEvent|date('d/m/Y H:i') }}</p>
-    <p><strong>Description :</strong> {{ event.descriptionEvent }}</p>
-    <p><strong>Catégorie :</strong> {{ event.category ? event.category.nameCategory : 'Aucune catégorie' }}</p>
-    <p><strong>Adresse :</strong> {{ event.address.getAddress() }}, 
-    <p><strong>Ville : </strong> {{ event.address.getCity() }} </p>
-    <p><strong>Code Postal : </strong> {{ event.address.getCp() }} </p>
+    <!-- COLONNE DROITE : INFOS DE L'ÉVÉNEMENT -->
+    <div class="event-grid">
+        <div class="profile-container">
+            <h1>{{ event.titleEvent }}</h1>
 
+            {% if event.category %}
+                <p class="event-info"><strong>Catégorie :</strong> {{ event.category.nameCategory }}</p>
+            {% endif %}
 
+            <p class="event-info"><strong>Date :</strong> {{ event.dateTimeEvent|date('d/m/Y H:i') }}</p>
 
+            {% if event.address %}
+                <p class="event-info"><strong>Adresse :</strong> {{ event.address.address }}, {{ event.address.city }} ({{ event.address.cp }})</p>
+            {% endif %}
 
+            {% if event.descriptionEvent %}
+                <p class="event-description">{{ event.descriptionEvent }}</p>
+            {% endif %}
 
-    <a href="{{ path('myevents') }}" class="btn btn-secondary mt-3">⬅ Retour à mes événements</a>
+            <p><strong>Participants :</strong> 
+                {{ event.nbxParticipant }} / {{ event.nbxParticipantMax is not empty ? event.nbxParticipantMax : 'Illimité' }}
+            </p>
+
+            <div class="event-actions">
+                <a href="{{ path('myevents') }}" class="btn-submit">⬅ Retour à mes événements</a>
+                <a href="{{ path('editmyevent', {id: event.id}) }}" class="btn-submit">Modifier</a>
+                <a href="{{ path('deletemyevent', {id: event.id}) }}" class="btn-submit btn-danger"
+                   onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* --- CONTENEUR GLOBAL --- */
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- COLONNE GAUCHE : IMAGE GRANDE --- */
+.ColonneGauche {
+    width: 50%;
+    background-color: #003f66;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 0 10px 10px 0;
+}
+
+.event-image {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+}
+
+/* --- COLONNE DROITE : INFOS --- */
+.event-grid {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+}
+
+.profile-container {
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.profile-container h1 {
+    font-size: 2.4rem;
+    color: #003f66;
+    margin-bottom: 15px;
+}
+
+.event-info {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.event-description {
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.6;
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* --- BOUTONS --- */
+.event-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-submit {
+    background-color: #005791;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+}
+
+.btn-submit:hover {
+    background-color: #003f66;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .event-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .ColonneGauche, .event-grid {
+        width: 100%;
+    }
+
+    .event-image {
+        height: 50vh;
+    }
+
+    .profile-container h1 {
+        font-size: 2rem;
+    }
+
+    .event-info, .event-description {
+        font-size: 1rem;
+    }
+}
+</style>
 {% endblock %}

@@ -15,77 +15,71 @@ Accueil
     <!-- 🧭 COLONNE GAUCHE - FILTRES -->
     <div class="filters">
 
-    {% if selectedCategory %}
-            <p style="text-align:center; font-style:italic;">
-                Événements pour la catégorie :
-                <strong>
-                    {{ categories|filter(cat => cat.id == selectedCategory)|first.nameCategory }}
-                </strong>
-        </p>
-    {% endif %}
+   
 
-    <!-- MSG D'AFFICHAGE POUR BARRE DE RECHERCHE FILTREE RESULTAT-->
-    {% if searchCity %}
-        <p style="text-align:center; font-style:italic;">
-            Résultats pour la ville : <strong>{{ searchCity }}</strong>
-        </p>
-    {% endif %}
+    
 
 
 
 
+<form action="{{ path('app_events') }}" method="get" class="filter-form">
 
-        <!-- BARRE DE RECHERCHE PAR VILLE -->
-        <form action="{{ path('app_events') }}" method="get" class="search-bar">
-            <input type="search" name="terme" placeholder="Saisir le nom d'une ville" value="{{ searchCity ?? '' }}">
-            <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-        </form>
+    <!-- Barre de recherche par ville -->
+    <div class="search-bar">
+        <input type="search" name="terme" placeholder="Saisir le nom d'une ville" value="{{ searchCity ?? '' }}">
+        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
 
+    <!-- Liste déroulante des catégories -->
+    <div class="filter-row">
+        <select name="id_category">
+            <option value="">Toutes les catégories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selectedCategory == cat.id %}selected{% endif %}>
+                    {{ cat.nameCategory }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-        
+    <!-- Filtres de date -->
+    <div class="date-filter">
+        <label for="start_date">📅 À partir du :</label>
+        <input type="date" id="start_date" name="start_date" value="{{ startDate ?? '' }}">
 
-       
+        <label for="end_date">📅 Jusqu'au :</label>
+        <input type="date" id="end_date" name="end_date" value="{{ endDate ?? '' }}">
+    </div>
 
-       <!-- Liste déroulante Catégories -->
-        <div class="filter-row">
-            <form action="{{ path('app_events') }}" method="get">
-                <select name="id_category" onchange="this.form.submit()">
-                    <option value="">Toutes les catégories</option>
-                    {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if selectedCategory == cat.id %}selected{% endif %}>
-                            {{ cat.nameCategory }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </form>
-        </div>
+    <!-- Boutons -->
+    <div class="filter-buttons">
+        <button type="submit" class="btn-filter">Filtrer</button>
+        <a href="{{ path('app_events') }}" class="btn-reset">Réinitialiser</a>
+    </div>
+</form>
 
-
-
-        <!-- Filtres Âge 
-            <div class="filter">
-                <label>Âge minimum : <span id="minAge">18</span></label>
-                <input type="range" id="minRange" min="18" max="99" value="18">
-
-                <label>Âge maximum : <span id="maxAge">99</span></label>
-                <input type="range" id="maxRange" min="18" max="99" value="99">
-            </div>
-        -->
-
-        <!-- Filtre Date -->
-        <form method="GET" action="{{ path('app_events') }}" class="date-filter">
-            <label for="start_date">📅 À partir du :</label>
-            <input type="date" id="start_date" name="start_date" value="{{ app.request.query.get('start_date') }}">
-<br>
-            <label for="end_date">📅 Jusqu'au :</label>
-            <input type="date" id="end_date" name="end_date" value="{{ app.request.query.get('end_date') }}">
-
-            {# Conserver les autres filtres lors du submit #}
-            <input type="hidden" name="id_category" value="{{ selectedCategory ?? '' }}">
-            <input type="hidden" name="terme" value="{{ searchCity ?? '' }}">
-
-            <button type="submit">Filtrer</button>
-        </form>
+{% if searchCity or selectedCategory or startDate or endDate %}
+    <div class="active-filters">
+        <h4>Filtres actifs :</h4>
+        <ul>
+            {% if searchCity %}
+                <li>🏙️ Ville : <strong>{{ searchCity }}</strong></li>
+            {% endif %}
+            {% if selectedCategory %}
+                {% set catName = categories|filter(c => c.id == selectedCategory)|first %}
+                {% if catName %}
+                    <li>📂 Catégorie : <strong>{{ catName.nameCategory }}</strong></li>
+                {% endif %}
+            {% endif %}
+            {% if startDate %}
+                <li>📅 À partir du : <strong>{{ startDate|date('d/m/Y') }}</strong></li>
+            {% endif %}
+            {% if endDate %}
+                <li>📅 Jusqu’au : <strong>{{ endDate|date('d/m/Y') }}</strong></li>
+            {% endif %}
+        </ul>
+    </div>
+{% endif %}
 
        
 
@@ -120,13 +114,28 @@ Accueil
     <div class="events-grid">
         {% for event in events %}
             <div class="event-card">
-                {% if event.imageEvent %}
-                    <img src="{{ asset('uploads/avatars/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}" class="event-image">
-                {% else %}
-                    <img src="{{ asset('uploads/avatars/default.png') }}" alt="Image par défaut" class="event-image">
-                {% endif %}
+                    {% if event.imageEvent %}
+                        <img src="{{ asset('uploads/events/' ~ event.imageEvent) }}" 
+                            alt="{{ event.titleEvent }}" class="event-image">
+                    {% else %}
+                        <img src="{{ asset('uploads/events/autreévènement.jpg') }}" 
+                            alt="Image par défaut"  class="event-image">
+                    {% endif %}
+
 
                 <div class="event-overlay">
+
+                   
+
+
+                        <!-- Btn supp visible uniquement pour l'ADMIN -->
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <form action="{{ path('app_event_delete', {id: event.id}) }}" method="post" onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer cet événement ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_event_' ~ event.id) }}">
+                                <button type="submit" class="btn-delete">🗑️ Supprimer</button>
+                            </form>
+                        {% endif %}
+
                     <h2 class="event-title">{{ event.titleEvent }}</h2>
 
                     <div class="event-meta">
@@ -142,13 +151,13 @@ Accueil
 
 
                         
-
+                       
 
 
                 {# Bouton “S’inscrire” seulement si l’utilisateur est connecté #}
                     {% if app.user %}
                     <button>    
-                    <a href="{{ path('viewthisevent', {id: event.id}) }}" class="btn btn-primary">
+                        <a href="{{ path('viewthisevent', {id: event.id}) }}" class="btn btn-primary">
                             Voir +
                         </a>
                     </button>
@@ -319,6 +328,104 @@ Accueil
     margin-bottom: 8px;
 }
 
+
+
+
+
+
+
+
+{# BTN Filtre & Reinitialisation des FILTRES  #}
+.filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-filter {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-reset {
+    background-color: #e74c3c;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.active-filters {
+    margin-top: 1rem;
+    background-color: #eef5ff;
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.active-filters ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.active-filters li {
+    margin: 4px 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+{# Btn SUPPRIMER EVENT uniquement visible par ADMIN #}
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* --- Responsive --- */
 @media (max-width: 1200px) {
     .events-grid {
@@ -337,6 +444,49 @@ Accueil
         grid-template-columns: 1fr;
     }
 }
+
+
+
+/* Responsive pour TABLETTE */
+ /* ========== MEDIA QUERIES ========== */
+            @media (max-width: 768px) {
+                .event-container {
+                    flex-direction: column; /* colonnes empilées */
+                }
+
+                .filters, .events-grid {
+                    width: 100%; /* occupe toute la largeur */
+                }
+
+                .events-grid {
+                    grid-template-columns: repeat(1, 1fr); /* 1 événement par ligne */
+                }
+
+                .footer-columns {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 2rem;
+                }
+
+                .pagination{
+                    text-align:center;
+                    font-size: 20px;
+                }
+
+                header {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 1rem;
+                }
+
+                footer {
+                    padding: 2rem;
+                    display:flex;
+                    flex-direction: column;
+                }
+            
+}
+
 
 
   

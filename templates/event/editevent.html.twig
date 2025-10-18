@@ -1,18 +1,176 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier un événement{% endblock %}
+{% block title %}Modifier l’événement{% endblock %}
 
 {% block body %}
-    <h1>Modifier l’événement</h1>
+<section class="event-container">
+    <!-- COLONNE GAUCHE : IMAGE DE L'ÉVÉNEMENT -->
+    <div class="ColonneGauche">
+        {% if currentImage %}
+            <img src="{{ asset('uploads/events/' ~ currentImage) }}" alt="Image de l'événement" class="event-image">
+        {% else %}
+            <img src="{{ asset('uploads/events/autreévènement.jpg') }}" alt="Image par défaut" class="event-image">
+        {% endif %}
+    </div>
 
-    {% if currentImage %}
-    <img src="{{ asset('uploads/avatars/' ~ currentImage) }}" alt="Image de l'événement" style="max-width:200px;">
-{% endif %}
+    <!-- COLONNE DROITE : FORMULAIRE -->
+    <div class="event-grid">
+        <div class="profile-container">
+            <h1>Modifier l’événement</h1>
 
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-    {{ form_end(form) }}
+            {% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
 
-    <a href="{{ path('app_events') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+
+            {{ form_start(form) }}
+                {% for field in form %}
+                    {% if field.vars.name != '_token' %}
+                        {% if field.vars.block_prefixes[1] == 'address' %}
+                            {# Affiche un label général "Adresse" au-dessus des sous-champs #}
+                            <label style="font-weight:bold; margin-bottom:5px;">Adresse</label>
+                            {% for subfield in field %}
+                                <div class="form-row">
+                                    {{ form_label(subfield) }}
+                                    {{ form_widget(subfield, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(subfield) }}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="form-row">
+                                {{ form_label(field) }}
+                                {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+            {{ form_end(form) }}
+
+            <a href="{{ path('app_events') }}" class="btn-submit btn-secondary mt-3">⬅ Retour à la liste</a>
+        </div>
+    </div>
+</section>
+
+<style>
+/* --- CONTENEUR GLOBAL --- */
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- COLONNE GAUCHE : IMAGE GRANDE --- */
+.ColonneGauche {
+    width: 50%;
+    background-color: #003f66;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 0 10px 10px 0;
+}
+
+.event-image {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+}
+
+/* --- COLONNE DROITE : FORMULAIRE --- */
+.event-grid {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 50px;
+}
+
+.profile-container {
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* espace vertical entre les champs */
+}
+
+.profile-container h1 {
+    font-size: 2.4rem;
+    color: #003f66;
+    margin-bottom: 15px;
+}
+
+/* --- FORMULAIRE --- */
+.form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px; /* espace vertical entre chaque champ */
+}
+
+.form-row label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* --- BOUTONS --- */
+.btn-submit {
+    background-color: #005791;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+}
+
+.btn-submit:hover {
+    background-color: #003f66;
+}
+
+.btn-secondary {
+    background-color: #7f8c8d;
+}
+
+.btn-secondary:hover {
+    background-color: #606f73;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .event-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .ColonneGauche, .event-grid {
+        width: 100%;
+    }
+
+    .event-image {
+        height: 50vh;
+    }
+
+    .profile-container h1 {
+        font-size: 2rem;
+    }
+}
+</style>
 {% endblock %}

@@ -30,21 +30,21 @@
 
    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false'}}) }}
 
+<div class="form-fields" style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+    {{ form_row(form.lastnameUser) }}
+    {{ form_row(form.firstnameUser) }}
     {{ form_row(form.cityUser) }}
-
-    {# Affiche le champ mail avec les erreurs #}
-    <div class="form-group">
-        {{ form_label(form.mail_user) }}
-        {{ form_widget(form.mail_user) }}
-        {{ form_errors(form.mail_user) }}
-    </div>
-
+    {{ form_row(form.mail_user) }}
     {{ form_row(form.plainPassword) }}
     {{ form_row(form.avatarFile) }}
+</div>
 
+<div style="display: flex; justify-content: center; margin-top: 1.5rem;">
     <button class="btn-update">Mettre à jour</button>
+</div>
 
 {{ form_end(form) }}
+
 
 
             <div class="profile-actions">

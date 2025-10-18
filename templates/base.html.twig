@@ -9,6 +9,18 @@
 
         <script src="https://kit.fontawesome.com/b04d3e51a0.js" async></script>
 
+        {# Lien vers app.css #}
+        <link rel="stylesheet" href="{{ asset('assets/styles/app.css') }}">
+
+
+        {# POUR FAIRE LE RESPONSIVE #}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+        {#EXPORT GOOGLE FONT POLICE ECRITURE #}
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand">
+
+
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
@@ -30,7 +42,23 @@
     {# Chargement de mon FOOTER #}
     {% include 'partials/_footer.html.twig' %}
 
+
+  
+
+    <script src="{{ asset('js/burger.js') }}"></script>
+
+
+
     </body>
+
+    {#Affichage msg succès ou Erreur #}
+    {% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="flash-message flash-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% endfor %}
 
 
 </html>

@@ -3,19 +3,224 @@
 {% block title %}Connexion{% endblock %}
 
 {% block body %}
-<h1>Se connecter</h1>
+<section class="event-container">
+    <!-- COLONNE GAUCHE -->
+    <div class="ColonneGauche">
+        <h2>Bienvenue</h2>
+        <h5>Connectez-vous pour accéder à votre compte</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-envelope"></i>
+            <p>alkarshi.abdullrahman@gmail.com</p>
+        </div>
+    </div>
 
-{% if error %}
-    <div class="flash-error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-{% endif %}
+    <!-- COLONNE DROITE -->
+    <div class="event-grid">
+        <div class="profile-container">
+            <h1>Se connecter</h1>
 
-<form action="{{ path('login') }}" method="post">
-    <label for="email">Email :</label>
-    <input type="email" id="email" name="mail_user" value="{{ last_email }}" required>
+            {% if error %}
+                <div class="flash-error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
 
-    <label for="password">Mot de passe :</label>
-    <input type="password" id="password" name="password_user" required>
+            {% for message in app.flashes('success') %}
+                <div class="flash-success">{{ message }}</div>
+            {% endfor %}
 
-    <button type="submit">Se connecter</button>
-</form>
+           <form action="{{ path('login') }}" method="post" data-turbo="false" style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+                <label for="email">Email :</label>
+                <input type="email" id="email" name="mail_user" value="{{ last_email }}" required>
+
+                <div class="password-field">
+                    <label for="password">Mot de passe :</label>
+                   <input type="password" id="password" name="password_user" required>
+<button type="button" class="btn-show-password" data-password-target="password" aria-pressed="false">Voir</button>
+
+                </div>
+
+                <p class="password-requirements">
+                    Votre mot de passe doit contenir au minimum 14 caractères, incluant au moins une majuscule, une minuscule, un chiffre et un caractère spécial.
+                </p>
+
+                <div class="form-actions" style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-submit">Se connecter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+/* --- CONTENEUR GLOBAL --- */
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+/*STYLE REGEX */
+.password-requirements {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 5px;
+}
+
+
+
+
+
+{# Btn pour voir MDP en clair #}
+.btn-show-password {
+    margin-top: 5px;
+    background: #005791;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.btn-show-password:hover {
+    background: #003f66;
+}
+
+
+
+
+/* --- COLONNE GAUCHE --- */
+.ColonneGauche {
+    background-color: #005791;
+    width: 40%;
+    padding: 50px 30px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.ColonneGauche h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.ColonneGauche h5 {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+/* --- COLONNE DROITE --- */
+.event-grid {
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- FORMULAIRE --- */
+.profile-container {
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+.profile-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* --- CHAMPS DE FORMULAIRE --- */
+.profile-container form label {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.profile-container form input {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* --- BOUTON --- */
+.btn-submit {
+    background-color: #005791;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #00406a;
+}
+
+/* --- MESSAGES FLASH --- */
+.flash-success {
+    color: green;
+    font-weight: bold;
+    text-align: center;
+}
+
+.flash-error {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .event-container {
+        flex-direction: column;
+        height: auto;
+        justify-content: center;
+    }
+    .ColonneGauche, .event-grid {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .profile-container h1 {
+        font-size: 1.8rem;
+    }
+    .ColonneGauche h2 {
+        font-size: 1.8rem;
+    }
+}
+</style>
+
+
+<script>
+const togglePasswordLogin = document.getElementById('togglePasswordLogin');
+const passwordLoginInput = document.getElementById('password');
+
+togglePasswordLogin.addEventListener('click', function () {
+    const type = passwordLoginInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordLoginInput.setAttribute('type', type);
+    this.textContent = type === 'password' ? 'Voir' : 'Cacher';
+});
+</script>
+
+
 {% endblock %}

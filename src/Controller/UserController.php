@@ -30,66 +30,62 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class UserController extends AbstractController
 {
     /**  * Page INSCRIPTION */
-    #[Route('/registration', name: 'user_registration' , methods: ['GET','POST'])]
-    public function registration(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response {
+    #[Route('/registration', name: 'user_registration', methods: ['GET','POST'])]
+    public function registration( Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em ): Response {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
+        //Regarde si le formulaire a été soumis (POST), et si oui, remplis `$form` et `$user` avec les données envoyées
         $form->handleRequest($request);        
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            // Récupère le mot de passe saisi
+            //récupère MDP clair saisi par l’user
             $plainPassword = $form->get('password_user')->getData();
-
-            // Vérifie le REGEX manuellement pour plus de contrôle
             $regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{14,}$/';
+
+            // Vérifie le mot de passe
             if (!preg_match($regex, $plainPassword)) {
-                $this->addFlash('error', '❌ Le mot de passe doit comporter au moins 14 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial.');
-                return $this->redirectToRoute('user_registration');
+                $this->addFlash('error','❌ Le mot de passe doit comporter au moins 14 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial.');
+                return $this->redirectToRoute('user_registration'); 
             }
 
-        // Vérifier si l'email existe déjà
-        $existingUser = $em->getRepository(User::class)->findOneBy([
-            'mail_user' => $user->getMailUser()
-        ]);
+            // Vérifie si l'email existe déjà
+            $existingUser = $em->getRepository(User::class)->findOneBy([
+                'mail_user' => $user->getMailUser()
+            ]);
+            if ($existingUser) {
+                $this->addFlash('error', '❌ Cet email est déjà utilisé.');
+                return $this->redirectToRoute('user_registration'); 
+            }
 
-        if ($existingUser) {
-            $this->addFlash('error', 'Cet email est déjà utilisé.');
-            return $this->redirectToRoute('user_registration');
+            // Hash le mot de passe
+            $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+            $user->setPasswordUser($hashedPassword);
+
+            // Gestion de l'avatar
+            $avatarFile = $form->get('avatar_user')->getData();
+            if ($avatarFile) {
+                $newFilename = uniqid().'.'.$avatarFile->guessExtension();
+                $avatarFile->move(
+                    $this->getParameter('avatars_directory'),$newFilename);
+                $user->setAvatarUser($newFilename);
+            }
+
+            // Enregistrement en base
+            $em->persist($user);
+            $em->flush();
+            $this->addFlash('success', '✅ Inscription réussie !');
+            return $this->redirectToRoute('login'); // redirection vers login après succès
         }
 
-        // Hash le mot de passe seulement après que le formulaire soit validé
-        $hashedPassword = $passwordHasher->hashPassword(
-            $user,
-            $form->get('password_user')->getData()
-        );
-        $user->setPasswordUser($hashedPassword);
-        $avatarFile = $form->get('avatar_user')->getData();
-
-        if ($avatarFile) {
-            $originalFilename = pathinfo($avatarFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $newFilename = uniqid().'.'.$avatarFile->guessExtension();
-
-            // Déplace le fichier dans public/uploads/avatars
-            $avatarFile->move(
-                $this->getParameter('avatars_directory'), // paramètre à définir
-                $newFilename
-            );
-            $user->setAvatarUser($newFilename);
-        }
-
-        $em->persist($user);
-        $em->flush();
-
-        $this->addFlash('success', 'Inscription réussie !');
-        return $this->redirectToRoute('login');
-        }
-
-
+        // Affichage initial du formulaire
         return $this->render('default/registration.html.twig', [
             'form' => $form->createView(),
         ]);
-    }
+}
+
+
+
+
 
      /**  * Page CONNEXION */
     #[Route('/login', name: 'login' , methods: ['GET','POST'])]
