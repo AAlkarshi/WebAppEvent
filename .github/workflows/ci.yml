@@ -20,7 +20,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -pAbdullrahman"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pAbdullrahman"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
@@ -51,7 +51,7 @@ jobs:
       # Attend que MySQL soit complètement prêt avant de lancer les migrations
       - name: ⏱ Wait for MySQL to be ready
         run: |
-          until mysqladmin ping -h 127.0.0.1 -uroot --silent; do
+          until mysqladmin ping -h 127.0.0.1 -uroot -pAbdullrahman --silent; do
             echo "Waiting for MySQL..."
             sleep 3
           done
