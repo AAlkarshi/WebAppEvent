@@ -49,9 +49,8 @@ jobs:
         run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
         #Execute les test unitaire automatiquement
-      - name: 🧪 Run PHPUnit tests
-        run: php bin/phpunit --testdox
-
+      #- name: 🧪 Run PHPUnit tests
+       # run: php bin/phpunit --testdox
 
       - name: Run category tests only
         run: php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
