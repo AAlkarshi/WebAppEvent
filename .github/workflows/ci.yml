@@ -15,7 +15,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: ""          # Pas de mot de passe pour root
+          MYSQL_ROOT_PASSWORD: "Abdullrahman"
           MYSQL_DATABASE: symfony_test_test
         ports:
           - 3306:3306
@@ -46,7 +46,7 @@ jobs:
       - name: 🗃️ Set up test environment variables
         run: |
           cp .env.test .env.local
-          echo "DATABASE_URL=\"mysql://root@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4\"" >> .env.local
+          echo "DATABASE_URL=\"mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4\"" >> .env.local
 
       # Attend que MySQL soit complètement prêt avant de lancer les migrations
       - name: ⏱ Wait for MySQL to be ready
