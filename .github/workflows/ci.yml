@@ -1,6 +1,6 @@
 name: CI - Symfony Tests
 
-# Déclenche le workflow sur push ou pull request
+# Déclenche le workflow à chaque push ou pull request sur ces branches
 on:
   push:
     branches: [ master, main, develop ]
@@ -8,6 +8,7 @@ on:
 
 jobs:
   tests:
+    # Utilisation d'un runner Ubuntu
     runs-on: ubuntu-latest
 
     # Configuration du service MySQL
@@ -15,7 +16,9 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
+          # Mot de passe root pour MySQL (obligatoire pour initialiser la base)
           MYSQL_ROOT_PASSWORD: "Abdullrahman"
+          # Nom de la base de données de test
           MYSQL_DATABASE: symfony_test_test
         ports:
           - 3306:3306
@@ -26,11 +29,11 @@ jobs:
           --health-retries=3
 
     steps:
-      # Récupère le code source du repository
+      # 1️⃣ Récupère le code source depuis GitHub
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # Installe PHP 8.2 et les extensions nécessaires pour Symfony
+      # 2️⃣ Installe PHP et les extensions nécessaires
       - name: ⚙️ Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -38,17 +41,19 @@ jobs:
           extensions: mbstring, intl, pdo_mysql
           coverage: none
 
-      # Installe les dépendances Composer
+      # 3️⃣ Installe les dépendances Composer
       - name: 📦 Install Composer dependencies
         run: composer install --no-progress --no-interaction --prefer-dist
 
-      # Configure les variables d'environnement pour la base de test
+      # 4️⃣ Configure les variables d'environnement Symfony pour la base de test
       - name: 🗃️ Set up test environment variables
         run: |
+          # Copie .env.test en .env.local pour que Symfony utilise ces variables
           cp .env.test .env.local
+          # Définit la connexion à MySQL avec mot de passe
           echo "DATABASE_URL=\"mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4\"" >> .env.local
 
-      # Attend que MySQL soit complètement prêt avant de lancer les migrations
+      # 5️⃣ Attend que MySQL soit prêt avant d'exécuter les migrations
       - name: ⏱ Wait for MySQL to be ready
         run: |
           until mysqladmin ping -h 127.0.0.1 -uroot -pAbdullrahman --silent; do
@@ -56,14 +61,16 @@ jobs:
             sleep 3
           done
 
-      # Applique les migrations Doctrine dans la base de test
+      # 6️⃣ Crée la base de test si elle n'existe pas et applique les migrations
       - name: 🧱 Run database migrations
-        run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
+        run: |
+          php bin/console doctrine:database:create --env=test || echo "Database already exists"
+          php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
-      # Exécute tous les tests unitaires PHPUnit
+      # 7️⃣ Exécute tous les tests unitaires PHPUnit
       - name: 🧪 Run PHPUnit tests
         run: php bin/phpunit --testdox
 
-      # Exécute uniquement les tests de CategoryController (optionnel)
+      # 8️⃣ Optionnel : exécute uniquement les tests de CategoryController
       - name: 🧪 Run category tests only
         run: php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
