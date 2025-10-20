@@ -17,9 +17,7 @@ class CategoryType extends AbstractType
             ->add('name_category', TextType::class, [
                 'label' => 'Nom de la catégorie',
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez saisir un nom de catégorie.',
-                    ]),
+                    new NotBlank(message: 'Veuillez saisir un nom de catégorie.'),
                 ],
             ]);
     }
