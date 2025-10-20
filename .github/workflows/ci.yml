@@ -1,6 +1,6 @@
 name: CI - Symfony Tests
 
-# Déclenche le workflow sur les push et pull request sur ces branches
+# Déclenche le workflow sur push ou pull request
 on:
   push:
     branches: [ master, main, develop ]
@@ -8,31 +8,30 @@ on:
 
 jobs:
   tests:
-    # Utilise une machine virtuelle Ubuntu
     runs-on: ubuntu-latest
 
-    # Services nécessaires pour les tests (ici MySQL)
+    # Configuration du service MySQL
     services:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root         # Mot de passe root pour MySQL dans le pipeline
-          MYSQL_DATABASE: symfony_test_test # Nom de la base de test
+          MYSQL_ROOT_PASSWORD: ""          # Pas de mot de passe pour root
+          MYSQL_DATABASE: symfony_test_test
         ports:
           - 3306:3306
         options: >-
-          # Vérifie que MySQL est prêt avant d'exécuter les commandes
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          # Vérifie la santé du container MySQL avant de continuer
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
 
     steps:
-      # Étape 1 : Récupère le code source depuis GitHub
+      # Récupère le code source du repository
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # Étape 2 : Installe PHP 8.2 avec les extensions nécessaires
+      # Installe PHP 8.2 et les extensions nécessaires pour Symfony
       - name: ⚙️ Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -40,34 +39,32 @@ jobs:
           extensions: mbstring, intl, pdo_mysql
           coverage: none
 
-      # Étape 3 : Installe les dépendances Composer
+      # Installe les dépendances Composer
       - name: 📦 Install Composer dependencies
         run: composer install --no-progress --no-interaction --prefer-dist
 
-      # Étape 4 : Configure la connexion à la base de test
+      # Configure les variables d'environnement pour la base de test
       - name: 🗃️ Set up test environment variables
         run: |
-          # Copie le fichier .env.test en .env.local pour l'environnement GitHub Actions
           cp .env.test .env.local
-          # Définit DATABASE_URL pour utiliser MySQL dans le pipeline
-          echo "DATABASE_URL=\"mysql://root:root@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4\"" >> .env.local
+          echo "DATABASE_URL=\"mysql://root@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4\"" >> .env.local
 
-      # Étape 5 : Attend que MySQL soit prêt avant de lancer les migrations
+      # Attend que MySQL soit complètement prêt avant de lancer les migrations
       - name: ⏱ Wait for MySQL to be ready
         run: |
-          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do
+          until mysqladmin ping -h 127.0.0.1 -uroot --silent; do
             echo "Waiting for MySQL..."
             sleep 3
           done
 
-      # Étape 6 : Applique les migrations Doctrine sur la base de test
+      # Applique les migrations Doctrine dans la base de test
       - name: 🧱 Run database migrations
         run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
-      # Étape 7 : Exécute tous les tests unitaires
+      # Exécute tous les tests unitaires PHPUnit
       - name: 🧪 Run PHPUnit tests
         run: php bin/phpunit --testdox
 
-      # Étape 8 : Exécute uniquement les tests liés à Category
+      # Exécute uniquement les tests de CategoryController (optionnel)
       - name: 🧪 Run category tests only
         run: php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
