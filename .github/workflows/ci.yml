@@ -48,8 +48,8 @@ jobs:
       # 4️⃣ Configure les variables d'environnement Symfony pour la base de test
       - name: 🗃️ Set up test environment variables
         run: |
-          cp .env.test .env.local
-          echo "DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"
+            cp .env.test .env.local
+            echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
       # 5️⃣ Attend que MySQL soit prêt avant d'exécuter les migrations
       - name: ⏱ Wait for MySQL to be ready
