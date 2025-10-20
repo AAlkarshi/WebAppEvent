@@ -20,8 +20,6 @@ jobs:
           MYSQL_ROOT_PASSWORD: "Abdullrahman"
           # Nom de la base de données de test
           MYSQL_DATABASE: symfony_test_test
-        ports:
-          - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pAbdullrahman"
           --health-interval=10s
