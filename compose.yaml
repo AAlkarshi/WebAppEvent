@@ -1,5 +1,5 @@
 services:
-  database:
+  mysql:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: Abdullrahman
@@ -11,10 +11,22 @@ services:
     volumes:
       - database_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pAbdullrahman"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -pAbdullrahman"]
       interval: 10s
+      timeout: 5s
       retries: 5
       start_period: 20s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: database
+      PMA_USER: root
+      PMA_PASSWORD: Abdullrahman
+    ports:
+      - "8080:80"
+    depends_on:
+      - database
 
 volumes:
   database_data:
