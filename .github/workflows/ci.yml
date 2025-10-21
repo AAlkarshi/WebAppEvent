@@ -44,21 +44,24 @@ jobs:
         run: composer install --no-progress --no-interaction --prefer-dist
 
       # 4️⃣ Configure les variables d'environnement Symfony pour la base de test
-      - name: 🗃️ Set up test environment variables
+      - name: 🗃️ Configure .env for tests
         run: |
-            cp .env.test .env.local
-            echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
+          cp .env.test .env.local
+          sed -i '/^DATABASE_URL/d' .env.local
+          echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
+          cat .env.local
+
 
         # 🔥 Nouvelle méthode : on attend le healthcheck du service
-      - name: ⏱ Wait for MySQL (healthcheck)
+      - name: ⏱ Wait for MySQL to be ready
         run: |
-          for i in {1..30}; do
-            if docker ps --filter "health=healthy" | grep mysql; then
-              echo "✅ MySQL is healthy!"
+          for i in {1..60}; do
+            if mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; then
+              echo "✅ MySQL is ready!"
               break
             fi
-            echo "Waiting for MySQL to be healthy..."
-            sleep 5
+            echo "Waiting for MySQL..."
+            sleep 2
           done
 
       - name: 🧱 Prepare database
