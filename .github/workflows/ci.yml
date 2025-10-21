@@ -49,13 +49,23 @@ jobs:
             cp .env.test .env.local
             echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
-      # 5️⃣ Attend que MySQL soit prêt avant d'exécuter les migrations
-      - name: ⏱ Wait for MySQL to be ready
+        # 🔥 Nouvelle méthode : on attend le healthcheck du service
+      - name: ⏱ Wait for MySQL (healthcheck)
         run: |
-          timeout 90 bash -c 'until mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; do
-            echo "Waiting for MySQL...";
-            sleep 1;
-          done'
+          for i in {1..30}; do
+            if docker ps --filter "health=healthy" | grep mysql; then
+              echo "✅ MySQL is healthy!"
+              break
+            fi
+            echo "Waiting for MySQL to be healthy..."
+            sleep 5
+          done
+
+      - name: 🧱 Prepare database
+        run: |
+          php bin/console doctrine:database:create --env=test || echo "Database already exists"
+          php bin/console doctrine:migrations:migrate --env=test --no-interaction
+
 
       # 6️⃣ Crée la base de test si elle n'existe pas et applique les migrations
       - name: 🧱 Run database migrations
