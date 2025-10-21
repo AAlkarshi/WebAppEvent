@@ -16,14 +16,12 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          # Mot de passe root pour MySQL (obligatoire pour initialiser la base)
           MYSQL_ROOT_PASSWORD: "Abdullrahman"
-          # Nom de la base de données de test
           MYSQL_DATABASE: symfony_test_test
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pAbdullrahman"
+          --health-cmd="mysqladmin ping -h localhost -uroot -pAbdullrahman"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
@@ -54,7 +52,7 @@ jobs:
       # 5️⃣ Attend que MySQL soit prêt avant d'exécuter les migrations
       - name: ⏱ Wait for MySQL to be ready
         run: |
-          timeout 30 bash -c 'until mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; do
+          timeout 90 bash -c 'until mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; do
             echo "Waiting for MySQL...";
             sleep 1;
           done'
