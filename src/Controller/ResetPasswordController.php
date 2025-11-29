@@ -20,7 +20,7 @@ use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
-
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Mailer\Transport;
 
 use Symfony\Component\Mailer\Mailer;
@@ -29,6 +29,8 @@ use Symfony\Component\Mime\Email;
 #[Route('/reset-password')]
 class ResetPasswordController extends AbstractController
 {
+    
+
     use ResetPasswordControllerTrait;
 
     public function __construct(
@@ -161,20 +163,72 @@ private function processSendingPasswordResetEmail(string $emailFormData, Transla
         return $this->redirectToRoute('app_check_email');
     }
 
+     // 🔹 Générer l'URL complète AVANT de créer l'email
+    $resetUrl = $this->generateUrl('app_reset_password', [
+        'token' => $resetToken->getToken()
+    ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+
     // 🔹 Mailer direct vers Mailtrap
     $dsn = $_ENV['MAILER_DSN'] ?? 'smtp://cb0c7fe78c994c:78ddfe43a5963d@sandbox.smtp.mailtrap.io:587?encryption=tls';
     $transport = Transport::fromDsn($dsn);
     $mailer = new \Symfony\Component\Mailer\Mailer($transport);
 
-    $email = (new TemplatedEmail())
+     // 🔹 Créer le contenu HTML directement dans le code
+    $htmlContent = '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <h1 style="color: #007bff;">Réinitialisation de votre mot de passe</h1>
+        
+        <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous :</p>
+        
+        <p>
+            <a href="' . $resetUrl . '" 
+               style="background-color: #007bff; 
+                      color: white; 
+                      padding: 12px 24px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      display: inline-block;
+                      font-weight: bold;">
+                Réinitialiser mon mot de passe
+            </a>
+        </p>
+        
+        <p>Ou copiez ce lien dans votre navigateur :</p>
+        <p style="background-color: #f5f5f5; padding: 10px; border-left: 3px solid #007bff;">
+            <strong>' . $resetUrl . '</strong>
+        </p>
+        
+        <p><em>Ce lien expirera dans 1 minute.</em></p>
+        
+        <p>Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+        
+        <p>Cordialement !<br>L\'équipe</p>
+    </body>
+    </html>
+    ';
+
+
+     // 🔹 Créer le contenu texte avec le vrai lien
+    $textContent = "Réinitialisation de votre mot de passe\n\n";
+    $textContent .= "Pour réinitialiser votre mot de passe, copiez et collez ce lien dans votre navigateur :\n\n";
+    $textContent .= $resetUrl . "\n\n";
+    $textContent .= "Ce lien expirera dans 1 minute.\n\n";
+    $textContent .= "Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.\n\n";
+    $textContent .= "Cordialement!";
+
+    $email = (new Email())
         ->from('alkarshi.abdullrahman@gmail.com')
         ->to($user->getMailUser())
         ->subject('Réinitialisation de votre mot de passe')
-        ->text('Pour réinitialiser votre mot de passe, cliquez sur le lien envoyé dans le corps HTML.')
-        ->htmlTemplate('reset_password/email.html.twig')
-        ->context([
-        'resetToken' => $resetToken,
-    ]);
+        ->text($textContent) 
+        ->html($htmlContent);
+       
 
     try {
         $mailer->send($email);
