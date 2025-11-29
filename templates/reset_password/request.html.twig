@@ -9,7 +9,7 @@
     {% endfor %}
     <h1>Reset your password</h1>
 
-    {{ form_start(requestForm) }}
+    {{ form_start(requestForm, { method: 'POST', action: path('app_forgot_password_request')}) }}
         {{ form_row(requestForm.mail_user) }}
         <div>
             <small>
@@ -18,6 +18,6 @@
             </small>
         </div>
 
-        <button class="btn btn-primary">Send password reset email</button>
+       <button type="submit" class="btn btn-primary">Send password reset email</button>
     {{ form_end(requestForm) }}
 {% endblock %}

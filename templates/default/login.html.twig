@@ -45,6 +45,12 @@
                 <div class="form-actions" style="display: flex; justify-content: center; margin-top: 1.5rem;">
                     <button type="submit" class="btn-submit">Se connecter</button>
                 </div>
+
+                <div class="form-actions" style="display: flex; flex-direction: column; align-items: center; margin-top: 1.5rem;">
+                    <a href="{{ path('app_forgot_password_request') }}" class="forgot-password">Mot de passe oublié ?</a>
+                </div>
+
+
             </form>
         </div>
     </div>
@@ -190,6 +196,21 @@
     text-align: center;
 }
 
+/* --- LIEN MOT DE PASSE OUBLIE --- */
+.forgot-password {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #005791;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.forgot-password:hover {
+    color: #003f66;
+    text-decoration: underline;
+}
+
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .event-container {
@@ -222,5 +243,28 @@ togglePasswordLogin.addEventListener('click', function () {
 });
 </script>
 
+
+<script>
+document.addEventListener('click', function(e) {
+  // si on clique un bouton qui a data-password-target
+  const btn = e.target.closest('button[data-password-target]');
+  if (!btn) return;
+
+  const targetId = btn.getAttribute('data-password-target');
+  const input = document.getElementById(targetId);
+  if (!input) return;
+
+  // toggle type
+  const isPassword = input.getAttribute('type') === 'password';
+  input.setAttribute('type', isPassword ? 'text' : 'password');
+
+  // accessible state + label
+  btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+  btn.textContent = isPassword ? 'Cacher' : 'Voir';
+
+  // move focus back to the input so user can continue typing
+  input.focus();
+});
+</script>
 
 {% endblock %}

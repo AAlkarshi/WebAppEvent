@@ -240,7 +240,7 @@ public function createMyEvent(Request $request, EventRepository $eventRepository
         $user = $this->getUser();
 
         if (!$user) {
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute('login');
         }
 
         // Empêche le créateur de s’inscrire à son propre événement

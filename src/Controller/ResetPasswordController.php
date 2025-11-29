@@ -20,6 +20,12 @@ use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
+
+use Symfony\Component\Mailer\Transport;
+
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+
 #[Route('/reset-password')]
 class ResetPasswordController extends AbstractController
 {
@@ -34,18 +40,15 @@ class ResetPasswordController extends AbstractController
     /**
      * Display & process form to request a password reset.
      */
-    #[Route('', name: 'app_forgot_password_request')]
-    public function request(Request $request, MailerInterface $mailer, TranslatorInterface $translator): Response
-    {
+    #[Route('', name: 'app_forgot_password_request', methods: ['GET', 'POST'])]
+    public function request(Request $request, TranslatorInterface $translator): Response {
         $form = $this->createForm(ResetPasswordRequestFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var string $email */
             $email = $form->get('mail_user')->getData();
 
-            return $this->processSendingPasswordResetEmail($email, $mailer, $translator
-            );
+            return $this->processSendingPasswordResetEmail($email, $translator);
         }
 
         return $this->render('reset_password/request.html.twig', [
@@ -53,12 +56,12 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
+
     /**
      * Confirmation page after a user has requested a password reset.
      */
     #[Route('/check-email', name: 'app_check_email')]
-    public function checkEmail(): Response
-    {
+    public function checkEmail(): Response {
         // Generate a fake token if the user does not exist or someone hit this page directly.
         // This prevents exposing whether or not a user was found with the given email address or not
         if (null === ($resetToken = $this->getTokenObjectFromSession())) {
@@ -129,48 +132,90 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
-    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer, TranslatorInterface $translator): RedirectResponse
-    {
-        $user = $this->entityManager->getRepository(User::class)->findOneBy([
-            'mail_user' => $emailFormData,
-        ]);
 
-        // Do not reveal whether a user account was found or not.
-        if (!$user) {
-            return $this->redirectToRoute('app_check_email');
-        }
 
-        try {
-            $resetToken = $this->resetPasswordHelper->generateResetToken($user);
-        } catch (ResetPasswordExceptionInterface $e) {
-            // If you want to tell the user why a reset email was not sent, uncomment
-            // the lines below and change the redirect to 'app_forgot_password_request'.
-            // Caution: This may reveal if a user is registered or not.
-            //
-            // $this->addFlash('reset_password_error', sprintf(
-            //     '%s - %s',
-            //     $translator->trans(ResetPasswordExceptionInterface::MESSAGE_PROBLEM_HANDLE, [], 'ResetPasswordBundle'),
-            //     $translator->trans($e->getReason(), [], 'ResetPasswordBundle')
-            // ));
 
-            return $this->redirectToRoute('app_check_email');
-        }
+
+private function processSendingPasswordResetEmail(string $emailFormData, TranslatorInterface $translator): RedirectResponse {
+    $user = $this->entityManager->getRepository(User::class)->findOneBy([
+        'mail_user' => $emailFormData,
+    ]);
+
+    if (!$user) {
+        return $this->redirectToRoute('app_check_email');
+    }
+
+    try {
+        $this->entityManager
+            ->getRepository(\App\Entity\ResetPasswordRequest::class)
+            ->removeResetRequest($user);
+
+        // Force le flush pour s'assurer de la suppression
+        $this->entityManager->flush();
+
+        $resetToken = $this->resetPasswordHelper->generateResetToken($user);
+    } catch (ResetPasswordExceptionInterface $e) {
+        // 🔹 DEBUG : Voir quelle exception est levée
+        $this->addFlash('error', 'Erreur reset : ' . $e->getMessage());
+        
+        return $this->redirectToRoute('app_check_email');
+    }
+
+    // 🔹 Mailer direct vers Mailtrap
+    $dsn = $_ENV['MAILER_DSN'] ?? 'smtp://cb0c7fe78c994c:78ddfe43a5963d@sandbox.smtp.mailtrap.io:587?encryption=tls';
+    $transport = Transport::fromDsn($dsn);
+    $mailer = new \Symfony\Component\Mailer\Mailer($transport);
+
+    $email = (new TemplatedEmail())
+        ->from('alkarshi.abdullrahman@gmail.com')
+        ->to($user->getMailUser())
+        ->subject('Réinitialisation de votre mot de passe')
+        ->text('Pour réinitialiser votre mot de passe, cliquez sur le lien envoyé dans le corps HTML.')
+        ->htmlTemplate('reset_password/email.html.twig')
+        ->context([
+        'resetToken' => $resetToken,
+    ]);
+
+    try {
+        $mailer->send($email);
+    } catch (\Exception $e) {
+        $this->addFlash('reset_password_error', $e->getMessage());
+    }
+
+    $this->setTokenObjectInSession($resetToken);
+    return $this->redirectToRoute('app_check_email');
+}
+
+
+
+
+
+
+
+
+
+    //TEST DSN  MAILTRAP
+    #[Route('/test-mail', name: 'app_test_mail')]
+    public function testMail(): Response {
+        $dsn = 'smtp://cb0c7fe78c994c:78ddfe43a5963d@sandbox.smtp.mailtrap.io:587?encryption=tls';
+        $transport = Transport::fromDsn($dsn);
+        $mailer = new \Symfony\Component\Mailer\Mailer($transport);
 
         $email = (new TemplatedEmail())
-            ->from(new Address('alkarshi.abdullrahman@gmail.com', 'Support Eventify'))
-            ->to((string) $user->getMailUser())
-            ->subject('Your password reset request')
-            ->htmlTemplate('reset_password/email.html.twig')
-            ->context([
-                'resetToken' => $resetToken,
-            ])
-        ;
+            ->from('no-reply@eventify.com')
+            ->to('1cc2062086-2a8d2c+user1@inbox.mailtrap.io')
+            ->subject('Test Mailtrap depuis ResetPasswordController')
+            ->text('Ceci est un test pour vérifier la configuration Mailer.');
 
         $mailer->send($email);
 
-        // Store the token object in session for retrieval in check-email route.
-        $this->setTokenObjectInSession($resetToken);
-
-        return $this->redirectToRoute('app_check_email');
+        return new Response('E-mail envoyé ! Vérifie ton inbox Mailtrap.');
     }
+
+
+
+
+
+
+
 }

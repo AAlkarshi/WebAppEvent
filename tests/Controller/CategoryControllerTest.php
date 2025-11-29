@@ -1,5 +1,6 @@
 <?php
 
+// TEST UNITAIRE 
 namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -19,8 +20,7 @@ use App\Entity\Category;
         $this->assertResponseRedirects('/login');
     }
 
-    public function testCreateCategoryAsAdmin(): void
-    {
+    public function testCreateCategoryAsAdmin(): void {
         $client = static::createClient();
         $container = $client->getContainer();
         $em = $container->get('doctrine')->getManager();

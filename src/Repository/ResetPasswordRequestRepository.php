@@ -29,4 +29,17 @@ class ResetPasswordRequestRepository extends ServiceEntityRepository implements 
     {
         return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
     }
+
+    
+    public function removeResetRequest(User $user): void {
+        $this->createQueryBuilder('r')
+            ->delete()
+            ->where('r.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->execute();
+    }
+
+
+
 }

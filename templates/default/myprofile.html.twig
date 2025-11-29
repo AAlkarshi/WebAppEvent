@@ -36,6 +36,7 @@
     {{ form_row(form.cityUser) }}
     {{ form_row(form.mail_user) }}
     {{ form_row(form.plainPassword) }}
+    <button type="button" class="btn-show-password"   data-password-target="{{ form.plainPassword.vars.id }}" aria-pressed="false">Voir</button>
     {{ form_row(form.avatarFile) }}
 </div>
 
@@ -131,6 +132,23 @@
     transition: 0.2s ease;
 }
 
+
+{# Btn pour voir MDP en clair #}
+.btn-show-password {
+    margin-top: 5px;
+    background: #005791;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.btn-show-password:hover {
+    background: #003f66;
+}
+
+
 .logout-btn { background-color: #005791; }
 .logout-btn:hover { background-color: #003f6e; }
 
@@ -140,4 +158,42 @@
 .delete-btn { background-color: #dc3545; }
 .delete-btn:hover { background-color: #b02a37; }
 </style>
+
+
+
+
+<script>
+const togglePasswordLogin = document.getElementById('togglePasswordLogin');
+const passwordLoginInput = document.getElementById('password');
+
+togglePasswordLogin.addEventListener('click', function () {
+    const type = passwordLoginInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordLoginInput.setAttribute('type', type);
+    this.textContent = type === 'password' ? 'Voir' : 'Cacher';
+});
+</script>
+
+<script>
+document.addEventListener('click', function(e) {
+  // si on clique un bouton qui a data-password-target
+  const btn = e.target.closest('button[data-password-target]');
+  if (!btn) return;
+
+  const targetId = btn.getAttribute('data-password-target');
+  const input = document.getElementById(targetId);
+  if (!input) return;
+
+  // toggle type
+  const isPassword = input.getAttribute('type') === 'password';
+  input.setAttribute('type', isPassword ? 'text' : 'password');
+
+  // accessible state + label
+  btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+  btn.textContent = isPassword ? 'Cacher' : 'Voir';
+
+  // move focus back to the input so user can continue typing
+  input.focus();
+});
+</script>
+
 {% endblock %}
