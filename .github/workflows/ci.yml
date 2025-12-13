@@ -8,18 +8,14 @@ on:
 
 jobs:
   tests:
-    # Utilisation d'un runner Ubuntu
     runs-on: ubuntu-latest
 
-    # Configuration du service MySQL
     services:
       mysql:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: Abdullrahman
           MYSQL_DATABASE: symfony_test_test
-        ports:
-          - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping -h localhost -uroot -pAbdullrahman"
           --health-interval=10s
@@ -27,66 +23,33 @@ jobs:
           --health-retries=3
 
     steps:
-      # 1️⃣ Récupère le code source depuis GitHub
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2️⃣ Installe PHP et les extensions nécessaires
-      - name: ⚙️ Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
           extensions: mbstring, intl, pdo_mysql
-          coverage: none
 
-      # 3️⃣ Installe les dépendances Composer
-      - name: 📦 Install Composer dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist
+      - run: composer install --no-dev --prefer-dist --ignore-platform-reqs
 
-      # 4️⃣ Configure les variables d'environnement Symfony pour la base de test
-      - name: 🗃️ Configure .env for tests
-        run: |
+      - run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
           echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
-          cat .env.local
 
-
-        # 🔥 Nouvelle méthode : on attend le healthcheck du service
-      - name: ⏱ Wait for MySQL to be ready
-        run: |
+      - run: |
           for i in {1..60}; do
-            if mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; then
-              echo "✅ MySQL is ready!"
-              break
-            fi
-            echo "Waiting for MySQL..."
+            if mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; then break; fi
             sleep 2
           done
 
-      - name: 🧱 Prepare test database
-        run: |
-          echo "💥 Suppression de la base test si elle existe..."
-          php bin/console doctrine:database:drop --env=test --force || echo "La base test n'existe pas, ok."
-
-          echo "✨ Création d'une nouvelle base test..."
+      - run: |
+          php bin/console doctrine:database:drop --env=test --force || echo "Database does not exist"
           php bin/console doctrine:database:create --env=test
-
-          echo "🔧 Création table user temporaire si nécessaire..."
-            mysql -h mysql -u root -pAbdullrahman symfony_test_test -e "
-            CREATE TABLE IF NOT EXISTS user (
-                id INT AUTO_INCREMENT NOT NULL,
-                mail_user VARCHAR(180) NOT NULL,
-                PRIMARY KEY(id)
-            );"
-
-          echo "🚀 Application de toutes les migrations sur la base test..."
           php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
+      - run: php bin/phpunit --testdox
 
-      # Exécute tous les tests unitaires PHPUnit
-      - name: 🧪 Run PHPUnit tests
-        run: php bin/phpunit --testdox
 
       # Optionnel : exécute uniquement les tests de CategoryController & EventController
       - name: 🧪 Run category tests only
