@@ -44,7 +44,7 @@ jobs:
       - name: ⏱ Wait for MySQL
         run: |
           for i in {1..60}; do
-            if mysql -h ${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SELECT 1"; then
+            if mysql -h${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SELECT 1"; then
               echo "MySQL is ready"
               break
             fi
@@ -55,7 +55,7 @@ jobs:
 
 
       # Vérification manuelle (optionnelle)
-      - run: mysql -h ${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SHOW DATABASES;"
+      - run: mysql -h${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
       # Commandes Doctrine
       - run: |
