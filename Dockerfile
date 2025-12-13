@@ -17,7 +17,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 
-# Installer les dépendances PHP sans les dev (production)
+# Installer les dépendances sans dev pour prod
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 # Copier le reste du code

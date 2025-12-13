@@ -29,8 +29,9 @@ jobs:
           php-version: 8.2
           extensions: mbstring, intl, pdo_mysql
 
-      # Installer les dépendances sans dev
-      - run: composer install --no-dev --prefer-dist --ignore-platform-reqs
+      - name: 📦 Install Composer dependencies
+        run: composer install --prefer-dist --ignore-platform-reqs
+
 
       - run: |
           cp .env.test .env.local
