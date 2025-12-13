@@ -18,7 +18,7 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 
 # Installer les dépendances PHP
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+RUN composer install --optimize-autoloader --ignore-platform-reqs
 
 # Copier le reste du code
 COPY . .
