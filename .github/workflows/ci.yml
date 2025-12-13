@@ -66,13 +66,13 @@ jobs:
 
       - name: 🧱 Prepare test database
         run: |
-          # Supprime la base test si elle existe
-          php bin/console doctrine:database:drop --env=test --force || echo "Database does not exist"
-          
-          # Crée une base test propre
+          echo "💥 Suppression de la base test si elle existe..."
+          php bin/console doctrine:database:drop --env=test --force || echo "La base test n'existe pas, ok."
+
+          echo "✨ Création d'une nouvelle base test..."
           php bin/console doctrine:database:create --env=test
-          
-          # Applique toutes les migrations sur cette base test
+
+          echo "🚀 Application de toutes les migrations sur la base test..."
           php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
       # Exécute tous les tests unitaires PHPUnit
