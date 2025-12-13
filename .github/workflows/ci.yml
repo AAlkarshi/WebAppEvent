@@ -84,3 +84,21 @@ jobs:
       - name: 🧪 Run category tests only
         run: php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
              php bin/phpunit tests/Controller/EventControllerTest.php --testdox
+
+
+
+  deploy:
+        needs: tests
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/master'  # Déploiement seulement depuis la branche master
+
+        steps:
+          - name: 📥 Checkout code
+            uses: actions/checkout@v4
+
+          - name: 🚀 Deploiement avec Render
+            env:
+              RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+            run: |
+              curl -X POST "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
+              -H "Authorization: Bearer $RENDER_API_KEY"
