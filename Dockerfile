@@ -13,12 +13,12 @@ RUN a2enmod rewrite
 # Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copier le code après Composer pour bénéficier du cache Docker
+# Copier composer.json et composer.lock pour bénéficier du cache Docker
 WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 
-# Installer les dépendances PHP
-RUN composer install --optimize-autoloader --ignore-platform-reqs
+# Installer les dépendances PHP sans les dev (production)
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 # Copier le reste du code
 COPY . .

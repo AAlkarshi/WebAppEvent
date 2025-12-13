@@ -1,6 +1,5 @@
 name: CI - Symfony Tests
 
-# Déclenche le workflow à chaque push ou pull request sur ces branches
 on:
   push:
     branches: [ master, main, develop ]
@@ -30,6 +29,7 @@ jobs:
           php-version: 8.2
           extensions: mbstring, intl, pdo_mysql
 
+      # Installer les dépendances sans dev
       - run: composer install --no-dev --prefer-dist --ignore-platform-reqs
 
       - run: |
@@ -50,26 +50,21 @@ jobs:
 
       - run: php bin/phpunit --testdox
 
-
-      # Optionnel : exécute uniquement les tests de CategoryController & EventController
       - name: 🧪 Run category tests only
-        run: php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
-             php bin/phpunit tests/Controller/EventControllerTest.php --testdox
-
-
+        run: |
+          php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
+          php bin/phpunit tests/Controller/EventControllerTest.php --testdox
 
   deploy:
-        needs: tests
-        runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/master'  # Déploiement seulement depuis la branche master
+    needs: tests
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
 
-        steps:
-          - name: 📥 Checkout code
-            uses: actions/checkout@v4
-
-          - name: 🚀 Deploiement avec Render
-            env:
-              RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-            run: |
-              curl -X POST "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
-              -H "Authorization: Bearer $RENDER_API_KEY"
+    steps:
+      - uses: actions/checkout@v4
+      - name: 🚀 Deploiement avec Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
+          -H "Authorization: Bearer $RENDER_API_KEY"
