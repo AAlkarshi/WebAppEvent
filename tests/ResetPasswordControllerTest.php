@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+
 /* TEST généré automatiquement pour vérifier que le processus fonctionne */
 class ResetPasswordControllerTest extends WebTestCase
 {
@@ -16,8 +17,7 @@ class ResetPasswordControllerTest extends WebTestCase
     private EntityManagerInterface $em;
     private UserRepository $userRepository;
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         $this->client = static::createClient();
 
         // Ensure we have a clean database
@@ -28,6 +28,9 @@ class ResetPasswordControllerTest extends WebTestCase
         $this->em = $em;
 
         $this->userRepository = $container->get(UserRepository::class);
+
+        // Nettoyer les catégories avant les utilisateurs
+        $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
 
         foreach ($this->userRepository->findAll() as $user) {
             $this->em->remove($user);
@@ -102,18 +105,16 @@ class ResetPasswordControllerTest extends WebTestCase
         self::assertTrue($passwordHasher->isPasswordValid($user, 'newStrongPassword'));
     }
 
-    protected function tearDown(): void {
+     protected function tearDown(): void{
+        // Nettoyer les données dans le bon ordre
+        if ($this->em) {
+            $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
+            $this->em->createQuery('DELETE FROM App\Entity\User')->execute();
+            
+            $this->em->close();
+        }
+        
         parent::tearDown();
-
-        $entityManager = self::getContainer()
-            ->get('doctrine')
-            ->getManager();
-
-        // IMPORTANT : supprimer dans le bon ordre (enfants → parents)
-        $entityManager->createQuery('DELETE FROM App\Entity\Category')->execute();
-        $entityManager->createQuery('DELETE FROM App\Entity\User')->execute();
-
-        $entityManager->clear();
-}
+    }
 
 }
