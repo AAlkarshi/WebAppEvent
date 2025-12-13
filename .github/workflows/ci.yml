@@ -29,7 +29,11 @@ jobs:
           php-version: 8.2
           extensions: mbstring, intl, pdo_mysql
 
-      - run: composer install --prefer-dist --ignore-platform-reqs
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --ignore-platform-reqs
 
       - run: |
           cp .env.test .env.local
