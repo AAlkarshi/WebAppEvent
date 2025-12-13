@@ -16,7 +16,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: Abdullrahman
           MYSQL_DATABASE: symfony_test_test
         options: >-
-          --health-cmd="mysqladmin ping -h mysql -uroot -pAbdullrahman"
+          --health-cmd="mysqladmin ping -h localhost -uroot -pAbdullrahman"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -43,14 +43,15 @@ jobs:
       # Attente active que MySQL soit prêt
       - name: ⏱ Wait for MySQL
         run: |
-          echo "Waiting for MySQL to start..."
           for i in {1..60}; do
-            if mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; then
-              echo "✅ MySQL is ready!"
+            if mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SELECT 1"; then
+              echo "MySQL is ready"
               break
             fi
+            echo "Waiting for MySQL..."
             sleep 2
           done
+
 
       # Vérification manuelle (optionnelle)
       - run: mysql -h mysql -uroot -pAbdullrahman -e "SHOW DATABASES;"
