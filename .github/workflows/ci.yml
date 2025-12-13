@@ -16,7 +16,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: Abdullrahman
           MYSQL_DATABASE: symfony_test_test
         options: >-
-          --health-cmd="mysqladmin ping -uroot -pAbdullrahman"
+          --health-cmd="mysqladmin ping -h localhost -uroot -pAbdullrahman"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -27,24 +27,24 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
-          extensions: mbstring, intl, pdo_mysql, zip, gd
+          extensions: mbstring, intl, pdo_mysql
 
       - name: Install MySQL client
         run: sudo apt-get update && sudo apt-get install -y mysql-client
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --prefer-dist --ignore-platform-reqs
+        run: composer install --prefer-dist --ignore-platform-reqs
 
-      - name: Setup environment
-        run: |
+      - run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
           echo 'DATABASE_URL="mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
+      # Attente active que MySQL soit prêt
       - name: ⏱ Wait for MySQL
         run: |
           for i in {1..60}; do
-            if mysql -h 127.0.0.1 -uroot -pAbdullrahman -e "SELECT 1" >/dev/null 2>&1; then
+            if mysql -h ${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SELECT 1"; then
               echo "MySQL is ready"
               break
             fi
@@ -52,22 +52,25 @@ jobs:
             sleep 2
           done
 
-      - name: Verify MySQL connection
-        run: mysql -h 127.0.0.1 -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
-      - name: Doctrine setup
-        run: |
+
+      # Vérification manuelle (optionnelle)
+      - run: mysql -h ${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SHOW DATABASES;"
+
+      # Commandes Doctrine
+      - run: |
           php bin/console doctrine:database:drop --env=test --force --if-exists || echo "Database does not exist"
           php bin/console doctrine:database:create --env=test --if-not-exists
           php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
-      - name: Run PHPUnit
-        run: php bin/phpunit --testdox
+      - run: php bin/phpunit --testdox
 
+      # Optionnel : tests spécifiques
       - name: 🧪 Run category tests only
         run: |
           php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
           php bin/phpunit tests/Controller/EventControllerTest.php --testdox
+
 
   deploy:
     needs: tests
