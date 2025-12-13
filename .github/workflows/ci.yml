@@ -19,7 +19,7 @@ jobs:
           --health-cmd="mysqladmin ping -h mysql -uroot -pAbdullrahman"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=10
 
     steps:
       - uses: actions/checkout@v4
@@ -29,21 +29,29 @@ jobs:
           php-version: 8.2
           extensions: mbstring, intl, pdo_mysql
 
-      - name: 📦 Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs
-
+      - run: composer install --no-dev --prefer-dist --ignore-platform-reqs
 
       - run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
           echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
-      - run: |
+      # Attente active que MySQL soit prêt
+      - name: ⏱ Wait for MySQL
+        run: |
+          echo "Waiting for MySQL to start..."
           for i in {1..60}; do
-            if mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; then break; fi
+            if mysqladmin ping -h mysql -uroot -pAbdullrahman --silent; then
+              echo "✅ MySQL is ready!"
+              break
+            fi
             sleep 2
           done
 
+      # Vérification manuelle (optionnelle)
+      - run: mysql -h mysql -uroot -pAbdullrahman -e "SHOW DATABASES;"
+
+      # Commandes Doctrine
       - run: |
           php bin/console doctrine:database:drop --env=test --force --if-exists || echo "Database does not exist"
           php bin/console doctrine:database:create --env=test --if-not-exists
@@ -51,10 +59,12 @@ jobs:
 
       - run: php bin/phpunit --testdox
 
+      # Optionnel : tests spécifiques
       - name: 🧪 Run category tests only
         run: |
           php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
           php bin/phpunit tests/Controller/EventControllerTest.php --testdox
+
 
   deploy:
     needs: tests
