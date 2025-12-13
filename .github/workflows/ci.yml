@@ -16,7 +16,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: Abdullrahman
           MYSQL_DATABASE: symfony_test_test
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -uroot -pAbdullrahman"
+          --health-cmd="mysqladmin ping -h mysql -uroot -pAbdullrahman"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
@@ -45,8 +45,8 @@ jobs:
           done
 
       - run: |
-          php bin/console doctrine:database:drop --env=test --force || echo "Database does not exist"
-          php bin/console doctrine:database:create --env=test
+          php bin/console doctrine:database:drop --env=test --force --if-exists || echo "Database does not exist"
+          php bin/console doctrine:database:create --env=test --if-not-exists
           php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
       - run: php bin/phpunit --testdox
