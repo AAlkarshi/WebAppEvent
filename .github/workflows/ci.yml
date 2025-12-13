@@ -64,23 +64,22 @@ jobs:
             sleep 2
           done
 
-      - name: 🧱 Prepare database
+      - name: 🧱 Prepare test database
         run: |
-          php bin/console doctrine:database:create --env=test || echo "Database already exists"
+          # Supprime la base test si elle existe
+          php bin/console doctrine:database:drop --env=test --force || echo "Database does not exist"
+          
+          # Crée une base test propre
+          php bin/console doctrine:database:create --env=test
+          
+          # Applique toutes les migrations sur cette base test
           php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
-
-      # 6️⃣ Crée la base de test si elle n'existe pas et applique les migrations
-      - name: 🧱 Run database migrations
-        run: |
-          php bin/console doctrine:database:create --env=test || echo "Database already exists"
-          php bin/console doctrine:migrations:migrate --env=test --no-interaction
-
-      # 7️⃣ Exécute tous les tests unitaires PHPUnit
+      # Exécute tous les tests unitaires PHPUnit
       - name: 🧪 Run PHPUnit tests
         run: php bin/phpunit --testdox
 
-      # 8️⃣ Optionnel : exécute uniquement les tests de CategoryController & EventController
+      # Optionnel : exécute uniquement les tests de CategoryController & EventController
       - name: 🧪 Run category tests only
         run: php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
              php bin/phpunit tests/Controller/EventControllerTest.php --testdox
