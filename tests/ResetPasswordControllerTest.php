@@ -36,8 +36,7 @@ class ResetPasswordControllerTest extends WebTestCase
         $this->em->flush();
     }
 
-    public function testResetPasswordController(): void
-    {
+    public function testResetPasswordController(): void {
         // Create a test user
         $user = (new User())
             ->setEmail('me@example.com')
@@ -102,4 +101,19 @@ class ResetPasswordControllerTest extends WebTestCase
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
         self::assertTrue($passwordHasher->isPasswordValid($user, 'newStrongPassword'));
     }
+
+    protected function tearDown(): void {
+        parent::tearDown();
+
+        $entityManager = self::getContainer()
+            ->get('doctrine')
+            ->getManager();
+
+        // IMPORTANT : supprimer dans le bon ordre (enfants → parents)
+        $entityManager->createQuery('DELETE FROM App\Entity\Category')->execute();
+        $entityManager->createQuery('DELETE FROM App\Entity\User')->execute();
+
+        $entityManager->clear();
+}
+
 }
