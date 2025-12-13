@@ -35,16 +35,17 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --ignore-platform-reqs
 
+      # Préparer l'environnement Symfony
       - run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
-          echo 'DATABASE_URL="mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
+          echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
       # Attente active que MySQL soit prêt
       - name: ⏱ Wait for MySQL
         run: |
           for i in {1..60}; do
-            if mysql -h${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SELECT 1"; then
+            if mysql -hmysql -uroot -pAbdullrahman -e "SELECT 1"; then
               echo "MySQL is ready"
               break
             fi
@@ -52,10 +53,8 @@ jobs:
             sleep 2
           done
 
-
-
       # Vérification manuelle (optionnelle)
-      - run: mysql -h${{ job.services.mysql.host }} -uroot -pAbdullrahman -e "SHOW DATABASES;"
+      - run: mysql -hmysql -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
       # Commandes Doctrine
       - run: |
@@ -70,7 +69,6 @@ jobs:
         run: |
           php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
           php bin/phpunit tests/Controller/EventControllerTest.php --testdox
-
 
   deploy:
     needs: tests
