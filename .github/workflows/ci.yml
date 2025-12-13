@@ -72,8 +72,17 @@ jobs:
           echo "✨ Création d'une nouvelle base test..."
           php bin/console doctrine:database:create --env=test
 
+          echo "🔧 Création table user temporaire si nécessaire..."
+          mysql -h localhost -u root -pAbdullrahman symfony_test_test -e "
+          CREATE TABLE IF NOT EXISTS user (
+              id INT AUTO_INCREMENT NOT NULL,
+              mail_user VARCHAR(180) NOT NULL,
+              PRIMARY KEY(id)
+          );"
+
           echo "🚀 Application de toutes les migrations sur la base test..."
           php bin/console doctrine:migrations:migrate --env=test --no-interaction
+
 
       # Exécute tous les tests unitaires PHPUnit
       - name: 🧪 Run PHPUnit tests
