@@ -1,32 +1,28 @@
-# Image PHP officielle avec Apache
 FROM php:8.2-apache
 
-# Installe les extensions nécessaires
+# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
-    libicu-dev \
-    libonig-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    git \
-    && docker-php-ext-install intl mbstring pdo_mysql zip opcache
+    libicu-dev libonig-dev libzip-dev zip unzip git \
+    libxml2-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install intl mbstring pdo_mysql zip opcache xml gd
 
-# Active mod_rewrite pour Symfony
+# Activer mod_rewrite pour Symfony
 RUN a2enmod rewrite
 
-# Copie le code dans le dossier Apache
-COPY . /var/www/html/
-
-WORKDIR /var/www/html/
-
-# Installe Composer
+# Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Installe les dépendances
-RUN composer install --no-dev --optimize-autoloader
+# Copier le code après Composer pour bénéficier du cache Docker
+WORKDIR /var/www/html
+COPY composer.json composer.lock ./
 
-# Expose le port 80
+# Installer les dépendances PHP
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+
+# Copier le reste du code
+COPY . .
+
+# Exposer le port 80 et démarrer Apache
 EXPOSE 80
-
-# Commande de démarrage
 CMD ["apache2-foreground"]
