@@ -80,6 +80,7 @@ jobs:
       - name: 🧪 Run PHPUnit tests
         run: php bin/phpunit --testdox
 
-      # 8️⃣ Optionnel : exécute uniquement les tests de CategoryController
+      # 8️⃣ Optionnel : exécute uniquement les tests de CategoryController & EventController
       - name: 🧪 Run category tests only
         run: php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
+             php bin/phpunit tests/Controller/EventControllerTest.php --testdox

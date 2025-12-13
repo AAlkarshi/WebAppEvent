@@ -53,6 +53,11 @@ class EventController extends AbstractController
             ->leftJoin('e.category', 'c')->addSelect('c');
 
 
+        // Masquage des événements passés de plus de 3 jours
+        $limitDate = new \DateTimeImmutable('-3 days'); // La limite est 3 jours avant aujourd'hui
+        $qb->andWhere('e.dateTime_event >= :limit') // On filtre pour ne garder que ceux qui ne sont pas passés
+        ->setParameter('limit', $limitDate);
+
        
 
         // 🔹 Si une catégorie est sélectionnée, on filtre
@@ -92,6 +97,8 @@ class EventController extends AbstractController
             8 // Nbx d'évent par page
         );
 
+       
+
         // 🔹 Rendu Twig
         return $this->render('event/list.html.twig', [
             'events' => $pagination,
@@ -101,6 +108,9 @@ class EventController extends AbstractController
             'startDate' => $startDate,
             'endDate' => $endDate,
         ]);
+
+
+       
 
 }
 
@@ -207,8 +217,7 @@ public function createMyEvent(Request $request, EventRepository $eventRepository
 
     // VOIR EVENT OU JE SUIS INSCRIS
    #[Route('/events/registeredevents', name: 'registeredevents')]
-    public function registeredEvents(EntityManagerInterface $em, PaginatorInterface $paginator, Request $request): Response
-{
+    public function registeredEvents(EntityManagerInterface $em, PaginatorInterface $paginator, Request $request): Response{
     $user = $this->getUser();
 
     $queryBuilder = $em->getRepository(Register::class)
@@ -439,8 +448,7 @@ public function viewMyEvent(Event $event): Response {
 
 //VOIR LES NIFOS D'UN EVENT AFIN DE S'Y INFORMER
 #[Route('/events/{id}', name: 'viewthisevent', methods: ['GET'])]
-public function viewthisEvent(Event $event, RegisterRepository $registerRepository, Security $security): Response
-{
+public function viewthisEvent(Event $event, RegisterRepository $registerRepository, Security $security): Response {
     $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
     $user = $security->getUser();
@@ -470,6 +478,11 @@ public function viewthisEvent(Event $event, RegisterRepository $registerReposito
         'isRegistered' => $isRegistered,
     ]);
 }
+
+
+
+
+
 
 
 }
