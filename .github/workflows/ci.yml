@@ -35,17 +35,16 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --ignore-platform-reqs
 
-      # Préparer l'environnement Symfony
-      - run: |
+      - name: Setup environment
+        run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
-          echo 'DATABASE_URL="mysql://root:Abdullrahman@mysql:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
+          echo 'DATABASE_URL="mysql://root:Abdullrahman@${{ job.services.mysql.host }}:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
-      # Attente active que MySQL soit prêt
       - name: ⏱ Wait for MySQL
         run: |
           for i in {1..60}; do
-            if mysql -hmysql -uroot -pAbdullrahman -e "SELECT 1"; then
+            if mysql -h "${{ job.services.mysql.host }}" -uroot -pAbdullrahman -e "SELECT 1"; then
               echo "MySQL is ready"
               break
             fi
@@ -53,19 +52,19 @@ jobs:
             sleep 2
           done
 
-      # Vérification manuelle (optionnelle)
-      - run: mysql -hmysql -uroot -pAbdullrahman -e "SHOW DATABASES;"
+      - name: Verify MySQL connection
+        run: mysql -h "${{ job.services.mysql.host }}" -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
-      # Commandes Doctrine
-      - run: |
+      - name: Doctrine setup
+        run: |
           php bin/console doctrine:database:drop --env=test --force --if-exists || echo "Database does not exist"
           php bin/console doctrine:database:create --env=test --if-not-exists
           php bin/console doctrine:migrations:migrate --env=test --no-interaction
 
-      - run: php bin/phpunit --testdox
+      - name: Run all tests
+        run: php bin/phpunit --testdox
 
-      # Optionnel : tests spécifiques
-      - name: 🧪 Run category tests only
+      - name: 🧪 Run specific controller tests
         run: |
           php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
           php bin/phpunit tests/Controller/EventControllerTest.php --testdox
@@ -77,7 +76,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: 🚀 Deploiement avec Render
+      - name: 🚀 Deploy to Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
