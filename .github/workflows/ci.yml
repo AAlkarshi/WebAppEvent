@@ -39,12 +39,13 @@ jobs:
         run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
-          echo 'DATABASE_URL="mysql://root:Abdullrahman@${{ job.services.mysql.host }}:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
+          echo 'DATABASE_URL="mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
+
 
       - name: ⏱ Wait for MySQL
         run: |
           for i in {1..60}; do
-            if mysql -h "${{ job.services.mysql.host }}" -uroot -pAbdullrahman -e "SELECT 1"; then
+            if mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SELECT 1"; then
               echo "MySQL is ready"
               break
             fi
@@ -53,7 +54,8 @@ jobs:
           done
 
       - name: Verify MySQL connection
-        run: mysql -h "${{ job.services.mysql.host }}" -uroot -pAbdullrahman -e "SHOW DATABASES;"
+        run: mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SHOW DATABASES;"
+
 
       - name: Doctrine setup
         run: |
