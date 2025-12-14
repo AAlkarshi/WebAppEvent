@@ -3,58 +3,54 @@
 namespace App\Tests;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use App\Enum\GenderUser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-
-/* TEST généré automatiquement pour vérifier que le processus fonctionne */
 class ResetPasswordControllerTest extends WebTestCase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $em;
-    private UserRepository $userRepository;
+    private $client;
+    private $em;
 
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         $this->client = static::createClient();
+        $this->em = static::getContainer()->get('doctrine')->getManager();
 
-        // Ensure we have a clean database
-        $container = static::getContainer();
+        // Nettoyage BDD : toujours supprimer les enfants avant les parents
+        $tables = [
+            'reset_password_request', // enfants de user
+            'event',                  // enfants de category
+            'register',
+            'category',               // parent
+            'user'                    // parent
+        ];
 
-        /** @var EntityManagerInterface $em */
-        $em = $container->get('doctrine')->getManager();
-        $this->em = $em;
-
-        $this->userRepository = $container->get(UserRepository::class);
-
-        // Nettoyer les catégories avant les utilisateurs
-        $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
-
-        foreach ($this->userRepository->findAll() as $user) {
-            $this->em->remove($user);
+        $conn = $this->em->getConnection();
+        $conn->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+        foreach ($tables as $t) {
+            $conn->executeStatement("TRUNCATE TABLE `$t`");
         }
-
-        $this->em->flush();
+        $conn->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     }
 
-      public function testResetPasswordController(): void {
-        // Création utilisateur de test
+    public function testResetPasswordController(): void
+    {
+        // Création utilisateur
         $user = (new User())
             ->setMailUser('me@example.com')
             ->setPasswordUser('old-password')
             ->setLastnameUser('Doe')
             ->setFirstnameUser('John')
-            ->setGenderUser(\App\Enum\GenderUser::Homme)
+            ->setGenderUser(GenderUser::Homme)
             ->setDatebirthUser(new \DateTimeImmutable('1990-01-01'))
             ->setCityUser('Paris');
 
         $this->em->persist($user);
         $this->em->flush();
 
-        // Génération du token via ResetPasswordHelperInterface
+        // Génération token via ResetPasswordHelperInterface (pas d'email)
         $resetHelper = static::getContainer()->get(ResetPasswordHelperInterface::class);
         $resetToken = $resetHelper->generateResetToken($user);
 
@@ -73,7 +69,7 @@ class ResetPasswordControllerTest extends WebTestCase
         $this->client->submit($form);
         $this->assertResponseRedirects('/login');
 
-        // Vérification que le mot de passe a bien été modifié
+        // Vérification du mot de passe
         $user = $this->em->getRepository(User::class)
             ->findOneBy(['mail_user' => 'me@example.com']);
         $this->assertInstanceOf(User::class, $user);
@@ -82,7 +78,7 @@ class ResetPasswordControllerTest extends WebTestCase
         $this->assertTrue($passwordHasher->isPasswordValid($user, 'newStrongPassword123'));
     }
 
-     protected function tearDown(): void{
+       protected function tearDown(): void{
         // Nettoyer les données dans le bon ordre
         if ($this->em) {
             $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
