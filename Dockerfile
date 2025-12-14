@@ -13,15 +13,17 @@ RUN a2enmod rewrite
 # Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copier composer.json et composer.lock pour bénéficier du cache Docker
+# Définir le répertoire de travail
 WORKDIR /var/www/html
+
+# Copier composer.json et composer.lock pour bénéficier du cache Docker
 COPY composer.json composer.lock ./
+
+# Copier tout le code source **avant** l'installation
+COPY . .
 
 # Installer les dépendances sans dev pour prod
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
-
-# Copier le reste du code
-COPY . .
 
 # Exposer le port 80 et démarrer Apache
 EXPOSE 80
