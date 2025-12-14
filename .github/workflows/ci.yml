@@ -118,6 +118,8 @@ jobs:
           fi
 
           echo "🚀 Déploiement sur Render..."
+          echo "Clé Render length: ${#RENDER_API_KEY}"
+          echo "Clé Render visible: ${RENDER_API_KEY:0:5}..."
           response=$(curl -s -w "\n%{http_code}" -X POST \
             "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
