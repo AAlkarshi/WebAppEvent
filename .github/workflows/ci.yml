@@ -1,4 +1,4 @@
-name: CI - Symfony Tests
+name: CI/CD - Symfony Tests & Deploy
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 jobs:
   tests:
+    name: 🧪 Tests Symfony
     runs-on: ubuntu-latest
 
     services:
@@ -24,67 +25,143 @@ jobs:
           --health-retries=10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
-          extensions: mbstring, intl, pdo_mysql
+          extensions: mbstring, intl, pdo_mysql, opcache, zip
+          coverage: xdebug
+          tools: composer:v2
 
-      - name: Install MySQL client
-        run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - name: 💾 Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs
+      - name: 📦 Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --ignore-platform-reqs
 
-      - name: Setup environment
+      - name: ⚙️ Setup environment
         run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
           echo 'DATABASE_URL="mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
-
-
-
       - name: ⏱ Wait for MySQL
         run: |
           for i in {1..60}; do
-            if mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SELECT 1"; then
-              echo "MySQL is ready"
+            if mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SELECT 1" 2>/dev/null; then
+              echo "✅ MySQL is ready"
               break
             fi
-            echo "Waiting for MySQL..."
+            echo "⏳ Waiting for MySQL... ($i/60)"
             sleep 2
           done
 
-
-      - name: Verify MySQL connection
+      - name: 🔍 Verify MySQL connection
         run: mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
-
-      - name: Doctrine schema (test only)
+      - name: 🗄️ Setup database schema
         run: |
           php bin/console doctrine:schema:drop --env=test --force || true
           php bin/console doctrine:schema:create --env=test
+          php bin/console cache:clear --env=test
 
-      - name: Run all tests
-        run: php bin/phpunit --testdox
+      - name: ✅ Check PHP syntax
+        run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: 🧪 Run specific controller tests
+      - name: 🧪 Run all PHPUnit tests
+        run: php bin/phpunit --testdox --coverage-text
+
+      - name: 🎯 Run specific controller tests
         run: |
           php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
           php bin/phpunit tests/Controller/EventControllerTest.php --testdox
 
+      - name: 📊 Test Summary
+        if: always()
+        run: |
+          echo "=========================================="
+          echo "Tests terminés !"
+          echo "=========================================="
+
   deploy:
+    name: 🚀 Deploy to Render
     needs: tests
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
-      - name: 🚀 Deploy to Render
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Trigger Render deployment
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          curl -X POST "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
-          -H "Authorization: Bearer $RENDER_API_KEY"
+          echo "🚀 Déploiement sur Render..."
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
+            -H "Authorization: Bearer $RENDER_API_KEY")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 201 ]; then
+            echo "✅ Déploiement déclenché avec succès !"
+            echo "📋 Réponse: $body"
+          else
+            echo "❌ Échec du déploiement (HTTP $http_code)"
+            echo "📋 Réponse: $body"
+            exit 1
+          fi
+
+      - name: ⏱️ Wait for deployment to start
+        run: |
+          echo "⏳ Attente du démarrage du déploiement (30s)..."
+          sleep 30
+
+      - name: 📢 Deployment notification
+        if: success()
+        run: |
+          echo "=========================================="
+          echo "✅ Déploiement réussi sur Render !"
+          echo "🌐 Vérifiez votre application sur:"
+          echo "   https://webappevent.onrender.com/"
+          echo "=========================================="
+
+      - name: ❌ Deployment failure notification
+        if: failure()
+        run: |
+          echo "=========================================="
+          echo "❌ Le déploiement a échoué !"
+          echo "🔍 Vérifiez les logs sur:"
+          echo "   https://dashboard.render.com"
+          echo "=========================================="
+
+  # Job optionnel : notification sur plusieurs branches
+  notify:
+    name: 📢 Notification
+    needs: [tests, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: 📊 Build Status Summary
+        run: |
+          echo "=========================================="
+          echo "📊 Résumé du pipeline CI/CD"
+          echo "=========================================="
+          echo "Branche: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Auteur: ${{ github.actor }}"
+          echo ""
+          echo "Tests: ${{ needs.tests.result }}"
+          echo "Deploy: ${{ needs.deploy.result }}"
+          echo "=========================================="
