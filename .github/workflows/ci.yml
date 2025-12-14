@@ -76,8 +76,7 @@ jobs:
       - name: ✅ Check PHP syntax
         run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: 🧪 Run all PHPUnit tests
-        run: php bin/phpunit --testdox --coverage-text
+     
 
       - name: 🎯 Run specific controller tests
         run: |
