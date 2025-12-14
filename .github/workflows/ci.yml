@@ -129,28 +129,27 @@ jobs:
             exit 1
           fi
 
+      - name: ⏱️ Wait for deployment to start
+        run: |
+          echo "⏳ Attente du démarrage du déploiement (30s)..."
+          sleep 30
 
-          - name: ⏱️ Wait for deployment to start
-            run: |
-              echo "⏳ Attente du démarrage du déploiement (30s)..."
-              sleep 30
+      - name: 📢 Deployment notification
+        if: success()
+        run: |
+          echo "=========================================="
+          echo "✅ Déploiement réussi sur Render !"
+          echo "🌐 Vérifiez votre application sur:"
+          echo "   https://webappevent.onrender.com/"
+          echo "=========================================="
 
-          - name: 📢 Deployment notification
-            if: success()
-            run: |
-              echo "=========================================="
-              echo "✅ Déploiement réussi sur Render !"
-              echo "🌐 Vérifiez votre application sur:"
-              echo "   https://webappevent.onrender.com/"
-              echo "=========================================="
+      - name: ❌ Deployment failure notification
+        if: failure()
+        run: |
+          echo "=========================================="
+          echo "❌ Le déploiement a échoué !"
+          echo "🔍 Vérifiez les logs sur:"
+          echo "   https://dashboard.render.com"
+          echo "=========================================="
 
-          - name: ❌ Deployment failure notification
-            if: failure()
-            run: |
-              echo "=========================================="
-              echo "❌ Le déploiement a échoué !"
-              echo "🔍 Vérifiez les logs sur:"
-              echo "   https://dashboard.render.com"
-              echo "=========================================="
-
-  
+ 
