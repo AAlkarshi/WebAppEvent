@@ -112,16 +112,10 @@ jobs:
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          if [ -z "$RENDER_API_KEY" ]; then
-            echo "❌ RENDER_API_KEY is empty or not provided. Set repository secret 'RENDER_API_KEY'."
-            exit 1
-          fi
-
-          echo "🚀 Déploiement sur Render..."
+          echo "🚀 Déploiement sur Render"
           response=$(curl -s -w "\n%{http_code}" -X POST \
             "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
-            -H "Authorization: Bearer $RENDER_API_KEY" \
-            -H "Accept: application/json")
+            -H "Authorization: Bearer $RENDER_API_KEY")
 
           http_code=$(echo "$response" | tail -n1)
           body=$(echo "$response" | head -n-1)
@@ -132,11 +126,6 @@ jobs:
           else
             echo "❌ Échec du déploiement (HTTP $http_code)"
             echo "📋 Réponse: $body"
-            if [ "$http_code" -eq 401 ]; then
-              echo "🔐 401 Unauthorized — check RENDER_API_KEY value and permissions."
-              echo "    • Regenerate an API key at: https://dashboard.render.com/account/api-keys"
-              echo "    • Update the secret at: Repository → Settings → Secrets and variables → Actions"
-            fi
             exit 1
           fi
 
