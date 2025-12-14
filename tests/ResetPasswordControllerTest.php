@@ -81,10 +81,15 @@ class ResetPasswordControllerTest extends WebTestCase
     public function testResetPasswordController(): void
     {
         // Create a test user
-        $user = (new User())
-            ->setEmail('me@example.com')
-            ->setPassword('a-test-password-that-will-be-changed-later')
-        ;
+        $user = new User();
+        $user->setMailUser('me@example.com'); // ← Utilise setMailUser() au lieu de setEmail()
+        $user->setPasswordUser('a-test-password-that-will-be-changed-later'); // ← Utilise setPasswordUser()
+        $user->setLastnameUser('Test');
+        $user->setFirstnameUser('User');
+        $user->setGenderUser(\App\Enum\GenderUser::Homme); // ou Female selon votre enum
+        $user->setDatebirthUser(new \DateTimeImmutable('1990-01-01'));
+        $user->setCityUser('Test City');
+        
         $this->em->persist($user);
         $this->em->flush();
 
@@ -136,7 +141,7 @@ class ResetPasswordControllerTest extends WebTestCase
 
         self::assertResponseRedirects('/login');
 
-        $user = $this->userRepository->findOneBy(['email' => 'me@example.com']);
+        $user = $this->userRepository->findOneBy(['mail_user' => 'me@example.com']); // ← Utilise mail_user
 
         self::assertInstanceOf(User::class, $user);
 
@@ -145,7 +150,8 @@ class ResetPasswordControllerTest extends WebTestCase
         self::assertTrue($passwordHasher->isPasswordValid($user, 'newStrongPassword'));
     }
 
-    protected function tearDown(): void {
+    protected function tearDown(): void
+    {
         // ✅ Nettoyer après le test
         $this->cleanDatabase();
         
