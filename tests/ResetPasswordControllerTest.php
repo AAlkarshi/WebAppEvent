@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-
 /* TEST généré automatiquement pour vérifier que le processus fonctionne */
 class ResetPasswordControllerTest extends WebTestCase
 {
@@ -17,7 +16,8 @@ class ResetPasswordControllerTest extends WebTestCase
     private EntityManagerInterface $em;
     private UserRepository $userRepository;
 
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         $this->client = static::createClient();
 
         // Ensure we have a clean database
@@ -29,14 +29,57 @@ class ResetPasswordControllerTest extends WebTestCase
 
         $this->userRepository = $container->get(UserRepository::class);
 
-        foreach ($this->userRepository->findAll() as $user) {
-            $this->em->remove($user);
-        }
-
-        $this->em->flush();
+        // ✅ Nettoyer la base de données dans le bon ordre
+        $this->cleanDatabase();
     }
 
-    public function testResetPasswordController(): void {
+    /**
+     * Nettoie la base de données en respectant les contraintes FK
+     */
+    private function cleanDatabase(): void
+    {
+        $connection = $this->em->getConnection();
+        
+        try {
+            // Méthode rapide : désactiver les FK checks
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+            
+            // Vider toutes les tables
+            $tables = ['event', 'reset_password_request', 'category', 'user'];
+            foreach ($tables as $table) {
+                try {
+                    $connection->executeStatement("TRUNCATE TABLE `$table`");
+                } catch (\Exception $e) {
+                    // Table n'existe peut-être pas encore
+                }
+            }
+            
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+            
+        } catch (\Exception $e) {
+            // Méthode lente : supprimer dans le bon ordre avec DQL
+            try {
+                $this->em->createQuery('DELETE FROM App\Entity\Event')->execute();
+            } catch (\Exception $e) {}
+            
+            try {
+                $this->em->createQuery('DELETE FROM App\Entity\ResetPasswordRequest')->execute();
+            } catch (\Exception $e) {}
+            
+            try {
+                $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
+            } catch (\Exception $e) {}
+            
+            try {
+                $this->em->createQuery('DELETE FROM App\Entity\User')->execute();
+            } catch (\Exception $e) {}
+        }
+        
+        $this->em->clear();
+    }
+
+    public function testResetPasswordController(): void
+    {
         // Create a test user
         $user = (new User())
             ->setEmail('me@example.com')
@@ -102,23 +145,11 @@ class ResetPasswordControllerTest extends WebTestCase
         self::assertTrue($passwordHasher->isPasswordValid($user, 'newStrongPassword'));
     }
 
-     protected function tearDown(): void{
-         // ✅ ORDRE CRITIQUE : du plus dépendant au moins dépendant
-        
-        // 1. Supprimer d'abord les Event (dépend de Category et User)
-        $this->em->createQuery('DELETE FROM App\Entity\Event')->execute();
-        
-        // 2. Supprimer les ResetPasswordRequest (dépend de User)
-        $this->em->createQuery('DELETE FROM App\Entity\ResetPasswordRequest')->execute();
-        
-        // 3. Supprimer les Category (dépend de User via created_id)
-        $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
-        
-        // 4. Supprimer enfin les User (référencé par tous les autres)
-        $this->em->createQuery('DELETE FROM App\Entity\User')->execute();
+    protected function tearDown(): void {
+        // ✅ Nettoyer après le test
+        $this->cleanDatabase();
         
         parent::tearDown();
         $this->em->close();
     }
-
 }
