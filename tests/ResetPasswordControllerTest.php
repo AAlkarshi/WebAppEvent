@@ -29,9 +29,6 @@ class ResetPasswordControllerTest extends WebTestCase
 
         $this->userRepository = $container->get(UserRepository::class);
 
-        // Nettoyer les catégories avant les utilisateurs
-        $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
-
         foreach ($this->userRepository->findAll() as $user) {
             $this->em->remove($user);
         }
@@ -106,15 +103,13 @@ class ResetPasswordControllerTest extends WebTestCase
     }
 
      protected function tearDown(): void{
-        // Nettoyer les données dans le bon ordre
-        if ($this->em) {
-            $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
-            $this->em->createQuery('DELETE FROM App\Entity\User')->execute();
-            
-            $this->em->close();
-        }
+         // ✅ ORDRE IMPORTANT : supprimer d'abord les enfants, puis les parents
+        $this->em->createQuery('DELETE FROM App\Entity\Event')->execute();
+        $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
+        $this->em->createQuery('DELETE FROM App\Entity\User')->execute();
         
         parent::tearDown();
+        $this->em->close();
     }
 
 }
