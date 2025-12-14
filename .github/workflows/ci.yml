@@ -113,9 +113,10 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
           echo "🚀 Déploiement sur Render..."
-          response=$(curl -s -w "\n%{http_code}" -X POST \
+            response=$(curl -s -w "\n%{http_code}" -X POST \
             "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
             -H "Authorization: Bearer $RENDER_API_KEY")
+
           
           http_code=$(echo "$response" | tail -n1)
           body=$(echo "$response" | head -n-1)
