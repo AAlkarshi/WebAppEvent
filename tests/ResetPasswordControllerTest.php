@@ -103,9 +103,18 @@ class ResetPasswordControllerTest extends WebTestCase
     }
 
      protected function tearDown(): void{
-         // ✅ ORDRE IMPORTANT : supprimer d'abord les enfants, puis les parents
+         // ✅ ORDRE CRITIQUE : du plus dépendant au moins dépendant
+        
+        // 1. Supprimer d'abord les Event (dépend de Category et User)
         $this->em->createQuery('DELETE FROM App\Entity\Event')->execute();
+        
+        // 2. Supprimer les ResetPasswordRequest (dépend de User)
+        $this->em->createQuery('DELETE FROM App\Entity\ResetPasswordRequest')->execute();
+        
+        // 3. Supprimer les Category (dépend de User via created_id)
         $this->em->createQuery('DELETE FROM App\Entity\Category')->execute();
+        
+        // 4. Supprimer enfin les User (référencé par tous les autres)
         $this->em->createQuery('DELETE FROM App\Entity\User')->execute();
         
         parent::tearDown();
