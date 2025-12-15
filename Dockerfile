@@ -25,7 +25,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Répertoire de travail
 WORKDIR /var/www/html
 
-# Copier les fichiers de l'app
+# Copier les fichiers de l'application
 COPY . .
 
 # Symfony PROD
@@ -36,16 +36,6 @@ ENV APP_DEBUG=0
 RUN composer install --no-dev --optimize-autoloader \
  && composer dump-env prod \
  && php bin/console cache:clear
-
-
-# Copier le script dans l'image
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
-# Donner les permissions d'exécution à l'intérieur du container
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Définir le script comme entrypoint
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Render détecte automatiquement le port 80
 EXPOSE 80
