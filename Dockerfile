@@ -1,30 +1,37 @@
 FROM php:8.2-apache
 
-# Installer les dépendances système
+# Dépendances système
 RUN apt-get update && apt-get install -y \
     libicu-dev libonig-dev libzip-dev zip unzip git \
-    libxml2-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev \
+    libxml2-dev libpng-dev libjpeg-dev libfreetype6-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install intl mbstring pdo_mysql zip opcache xml gd
 
-# Activer mod_rewrite pour Symfony
+# Apache + Symfony
 RUN a2enmod rewrite
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-# Installer Composer
+RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/sites-available/*.conf \
+    /etc/apache2/apache2.conf \
+    /etc/apache2/conf-available/*.conf
+
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Définir le répertoire de travail
 WORKDIR /var/www/html
-
-# Copier composer.json et composer.lock pour bénéficier du cache Docker
-COPY composer.json composer.lock ./
-
-# Copier tout le code source **avant** l'installation
 COPY . .
 
-# Installer les dépendances sans dev pour prod
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+# Symfony PROD
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
 
-# Exposer le port 80 et démarrer Apache
-EXPOSE 80
+RUN composer install --no-dev --optimize-autoloader \
+ && composer dump-env prod \
+ && php bin/console cache:clear
+
+# Render impose $PORT
+ENV PORT=10000
+EXPOSE 10000
+
 CMD ["apache2-foreground"]
