@@ -99,7 +99,7 @@ jobs:
 
           
   deploy:
-    name: 🚀 Deploy to Render
+    name: Deploiement sur Render
     needs: tests
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
@@ -111,12 +111,12 @@ jobs:
 
      
 
-      - name: ⏱️ Wait for deployment to start
+      - name: Attente du démarrage du déploiement
         run: |
-          echo "⏳ Attente du démarrage du déploiement (30s)..."
+          echo "Attente du démarrage du déploiement (30s)..."
           sleep 30
 
-      - name: 📢 Deployment notification
+      - name: Succès du Deploiement
         if: success()
         run: |
           echo "=========================================="
@@ -125,12 +125,12 @@ jobs:
           echo "   https://webappevent.onrender.com/"
           echo "=========================================="
 
-      - name: ❌ Deployment failure notification
+      - name: ❌ Echec du Deploiement
         if: failure()
         run: |
           echo "=========================================="
-          echo "❌ Le déploiement a échoué !"
-          echo "🔍 Vérifiez les logs sur:"
+          echo "Le déploiement a échoué !"
+          echo "Vérifiez les logs sur:"
           echo "   https://dashboard.render.com"
           echo "=========================================="
 
