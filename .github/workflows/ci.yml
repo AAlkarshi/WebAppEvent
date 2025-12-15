@@ -49,8 +49,8 @@ jobs:
 
       - name: ⚙️ Setup environment
         run: |
-          cp .env.test .env.test
-          sed -i '/^DATABASE_URL/d' .env.test
+          cp .env.test .env.local
+          sed -i '/^DATABASE_URL/d' .env.local
           echo 'DATABASE_URL="mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
       - name: ⏱ Wait for MySQL
