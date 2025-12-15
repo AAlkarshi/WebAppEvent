@@ -109,28 +109,7 @@ jobs:
         uses: actions/checkout@v4
 
 
-      - name: 🚀 Trigger Render deployment
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: |
-          echo "Clé Render length: ${#RENDER_API_KEY}"
-          echo "Clé Render visible: ${RENDER_API_KEY:0:6}..."
-          echo "🚀 Déploiement sur Render"
-          response=$(curl -s -w "\n%{http_code}" -X POST \
-            "https://api.render.com/deploy/srv-d4ulopur433s73dmpfcg" \
-            -H "Authorization: Bearer $RENDER_API_KEY")
-
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | head -n-1)
-
-          if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 201 ]; then
-            echo "✅ Déploiement déclenché avec succès !"
-            echo "📋 Réponse: $body"
-          else
-            echo "❌ Échec du déploiement (HTTP $http_code)"
-            echo "📋 Réponse: $body"
-            exit 1
-          fi
+     
 
       - name: ⏱️ Wait for deployment to start
         run: |
