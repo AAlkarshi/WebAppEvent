@@ -9,8 +9,11 @@ RUN apt-get update && apt-get install -y \
 
 # Apache + Symfony
 RUN a2enmod rewrite
+
+# Configurer le document root pour Apache (Symfony /public)
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
+# Modifier les fichiers de configuration Apache pour pointer vers le bon dossier public
 RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/sites-available/*.conf \
     /etc/apache2/apache2.conf \
@@ -19,16 +22,24 @@ RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Répertoire de travail
 WORKDIR /var/www/html
+
+# Copier les fichiers de l'application
 COPY . .
 
 # Symfony PROD
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
 
+# Installer les dépendances Symfony et optimiser le tout pour prod
 RUN composer install --no-dev --optimize-autoloader \
  && composer dump-env prod \
  && php bin/console cache:clear
+
+ # Exécuter les migrations Doctrine et charger les fixtures (important si la base de données est vide)
+RUN php bin/console doctrine:migrations:migrate --no-interaction \
+&& php bin/console doctrine:fixtures:load --no-interaction
 
 # Render détecte automatiquement le port 80
 EXPOSE 80
