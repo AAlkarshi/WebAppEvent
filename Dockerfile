@@ -37,12 +37,15 @@ RUN composer install --no-dev --optimize-autoloader \
  && composer dump-env prod \
  && php bin/console cache:clear
 
-RUN php bin/console doctrine:migrations:migrate --no-interaction \
- && echo "✅ Migrations OK" \
- && php bin/console doctrine:fixtures:load --no-interaction \
- && echo "✅ Fixtures OK"
 
+# Copier le script dans l'image
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
+# Donner les permissions d'exécution à l'intérieur du container
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Définir le script comme entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Render détecte automatiquement le port 80
 EXPOSE 80
