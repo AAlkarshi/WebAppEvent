@@ -30,8 +30,7 @@ RUN composer install --no-dev --optimize-autoloader \
  && composer dump-env prod \
  && php bin/console cache:clear
 
-# Render impose $PORT
-ENV PORT=10000
-EXPOSE 10000
+# Render détecte automatiquement le port 80
+EXPOSE 80
 
 CMD ["apache2-foreground"]
