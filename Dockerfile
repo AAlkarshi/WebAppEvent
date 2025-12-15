@@ -37,9 +37,7 @@ RUN composer install --no-dev --optimize-autoloader \
  && composer dump-env prod \
  && php bin/console cache:clear
 
- # Exécuter les migrations Doctrine et charger les fixtures (important si la base de données est vide)
-RUN php bin/console doctrine:migrations:migrate --no-interaction \
-&& php bin/console doctrine:fixtures:load --no-interaction
+
 
 # Render détecte automatiquement le port 80
 EXPOSE 80
