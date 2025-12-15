@@ -37,6 +37,11 @@ RUN composer install --no-dev --optimize-autoloader \
  && composer dump-env prod \
  && php bin/console cache:clear
 
+RUN php bin/console doctrine:migrations:migrate --no-interaction \
+ && echo "✅ Migrations OK" \
+ && php bin/console doctrine:fixtures:load --no-interaction \
+ && echo "✅ Fixtures OK"
+
 
 
 # Render détecte automatiquement le port 80
