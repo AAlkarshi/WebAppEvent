@@ -25,7 +25,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Répertoire de travail
 WORKDIR /var/www/html
 
-# Copier les fichiers de l'application
+# Copier les fichiers de l'app
 COPY . .
 
 # Symfony PROD
