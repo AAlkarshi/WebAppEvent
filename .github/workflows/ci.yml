@@ -108,12 +108,6 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔍 Test API Render
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: |
-          curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
-            https://api.render.com/v1/services | jq
 
       - name: 🚀 Trigger Render deployment
         env:
