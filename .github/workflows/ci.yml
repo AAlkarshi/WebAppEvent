@@ -1,4 +1,4 @@
-name: CI/CD - Symfony Tests & Deploy
+name: CI/CD - Symfony Tests & Deploiement
 
 on:
   push:
@@ -64,7 +64,7 @@ jobs:
             sleep 2
           done
 
-      - name: 🔍 Verify MySQL connection
+      - name: 🔍 Verification de la connexion MySQL
         run: mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
       - name: 🗄️ Setup database schema
@@ -76,7 +76,6 @@ jobs:
       - name: ✅ Check PHP syntax
         run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
 
-     
 
       - name: 🎯 Run specific controller tests
         run: |
@@ -92,46 +91,73 @@ jobs:
 
 
 
-
-
-
-
-
+  # ================================================
+  # CONTINUOUS DELIVERY (CD)
+  # Préparation du package de déploiement
           
   deploy:
-    name: Deploiement sur Render
+    name: CD - Build de Production
     needs: tests
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-
+    if: github.ref == 'refs/heads/master'
     steps:
-      - name: 📥 Checkout code
+      - name: Récupérer le code
         uses: actions/checkout@v4
 
+      - name: 📦 Installer dépendances de production
+        run: composer install --no-dev --optimize-autoloader --no-interaction
 
-     
-
-      - name: Attente du démarrage du déploiement
+      - name: 📦 Créer l'archive de déploiement
         run: |
-          echo "Attente du démarrage du déploiement (30s)..."
-          sleep 30
+          mkdir -p artifacts
+          tar -czf artifacts/symfony-app-${{ github.sha }}.tar.gz .
 
-      - name: Succès du Deploiement
-        if: success()
+      - name: 📤 Uploader l'artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: symfony-build-${{ github.sha }}
+          path: artifacts/symfony-app-${{ github.sha }}.tar.gz
+          retention-days: 7
+
+      - name: ✅ Build réussi
         run: |
-          echo "=========================================="
-          echo "✅ Déploiement réussi sur Render !"
-          echo "🌐 Vérifiez votre application sur:"
-          echo "   https://webappevent.onrender.com/"
-          echo "=========================================="
+          echo "============================================"
+          echo "✅ BUILD DE PRODUCTION CRÉÉ"
+          echo "============================================"
+          echo "Fichier: symfony-app-${{ github.sha }}.tar.gz"
+          echo "Taille: $(du -h artifacts/symfony-app-${{ github.sha }}.tar.gz | cut -f1)"
+          echo "Prêt pour déploiement manuel"
+          echo "============================================"
 
-      - name: ❌ Echec du Deploiement
-        if: failure()
+  # ================================================
+  # DÉPLOIEMENT MANUEL (optionnel)
+  # Télécharger l'artefact et déployer manuellement
+  # ================================================
+  
+  deploiement-infos:
+    name: 📢 Instructions de déploiement
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 📢 Guide de déploiement
         run: |
-          echo "=========================================="
-          echo "Le déploiement a échoué !"
-          echo "Vérifiez les logs sur:"
-          echo "   https://dashboard.render.com"
-          echo "=========================================="
-
- 
+          echo "============================================"
+          echo "🚀 VOTRE APPLICATION EST PRÊTE"
+          echo "============================================"
+          echo ""
+          echo "L'artefact de build a été créé avec succès !"
+          echo ""
+          echo "📥 POUR DÉPLOYER:"
+          echo "1. Allez dans l'onglet 'Actions' de votre repo GitHub"
+          echo "2. Cliquez sur ce workflow"
+          echo "3. Téléchargez l'artefact: symfony-build-${{ github.sha }}"
+          echo "4. Extrayez et uploadez sur votre serveur"
+          echo ""
+          echo "🔧 SUR VOTRE SERVEUR:"
+          echo "   tar -xzf symfony-app-${{ github.sha }}.tar.gz"
+          echo "   php bin/console doctrine:migrations:migrate"
+          echo "   php bin/console cache:clear --env=prod"
+          echo ""
+          echo "============================================"
