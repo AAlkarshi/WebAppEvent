@@ -105,7 +105,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 📦 Installer dépendances de production
-        run: composer install --no-dev --optimize-autoloader --no-interaction
+        env:
+            APP_ENV: prod
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
       - name: 📦 Créer l'archive de déploiement
         run: |
