@@ -91,7 +91,6 @@ jobs:
 
 
 
-  # ================================================
   # CONTINUOUS DELIVERY (CD)
   # Préparation du package de déploiement
           
@@ -131,10 +130,10 @@ jobs:
           echo "Prêt pour déploiement manuel"
           echo "============================================"
 
-  # ================================================
+ 
   # DÉPLOIEMENT MANUEL (optionnel)
   # Télécharger l'artefact et déployer manuellement
-  # ================================================
+ 
   
   deploiement-infos:
     name: 📢 Instructions de déploiement
