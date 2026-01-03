@@ -42,7 +42,7 @@ class UserController extends AbstractController
             $plainPassword = $form->get('password_user')->getData();
             $regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{14,}$/';
 
-            // Vérifie le mot de passe
+            // Vérifie le MDP
             if (!preg_match($regex, $plainPassword)) {
                 $this->addFlash('error','❌ Le mot de passe doit comporter au moins 14 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial.');
                 return $this->redirectToRoute('user_registration'); 
@@ -117,9 +117,10 @@ class UserController extends AbstractController
 
     /**  * Page MON PROFIL */
     #[Route('/myprofile', name: 'myprofile' , methods: ['GET','POST'])]
-    public function myprofile(Request $request, UserPasswordHasherInterface $passwordHasher, 
-                              EntityManagerInterface $em ): Response  {
+    public function myprofile(Request $request, UserPasswordHasherInterface $passwordHasher,EntityManagerInterface $em ): Response  {
 
+    // On récup l'user connecté et on force le type pour VS Code
+    /** @var \App\Entity\User&\Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface $user */
         // Vérifie si l'utilisateur est connecté
         $user = $this->getUser();
 
@@ -232,6 +233,8 @@ public function registrationAdmin(Request $request, UserPasswordHasherInterface 
 /* SUPPRESSION DE COMPTE */
 #[Route('/delete-account', name: 'delete_account', methods: ['POST'])]
 public function deleteAccount(Request $request, EntityManagerInterface $em, TokenStorageInterface $tokenStorage, EventRepository $eventRepository): Response {
+     // Forcer le type pour VS Code / Intelephense
+    /** @var \App\Entity\User $user */
     $user = $this->getUser();
 
     if (!$user) {

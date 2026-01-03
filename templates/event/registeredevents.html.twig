@@ -4,7 +4,7 @@
 
 {% block body %}
 <section class="events-container">
-    <h2>🎟️ Mes événements inscrits</h2>
+    <h2>Mes événements inscrits</h2>
 
     {% for label, messages in app.flashes %}
         {% for message in messages %}
@@ -76,11 +76,15 @@
 <style>
 .events-container {
     padding: 20px;
+    font-family: Quicksand;
+    font-weight: bold;
 }
 
 .events-container h2 {
     text-align: center;
     margin-bottom: 20px;
+    font-family: Quicksand;
+    font-weight: bold;
 }
 
 /* --- GRILLE D'ÉVÉNEMENTS --- */
@@ -116,6 +120,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    font-family: Quicksand;
+    font-weight: bold;
 }
 
 .event-info h3 {
@@ -149,6 +155,28 @@
 .btn-danger:hover {
     background-color: #c0392b;
 }
+
+
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    height: 40px;
+    width: 100%;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    color: black;
+    border: 1px solid #005791;
+    gap: 5px;
+    margin-top: auto;
+   
+}
+
+
+
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {

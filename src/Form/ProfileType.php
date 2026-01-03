@@ -11,8 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
-
-
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -25,14 +25,44 @@ class ProfileType extends AbstractType
             ->add('lastnameUser', TextType::class, [
                 'label' => 'Nom',
                 'required' => false,
+                'constraints' => [
+                    new Assert\Regex([
+                        'pattern' => '/^[\p{L}\s\'-]+$/u',
+                        'message' => 'Le nom ne peut contenir que des lettres, espaces, apostrophes ou tirets.',
+                    ]),
+                     new Length(
+                        max: 35,
+                        maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
+                    ),
+                ],
             ])
              ->add('firstnameUser', TextType::class, [
                 'label' => 'Prénom',
                 'required' => false,
+                'constraints' => [
+                    new Assert\Regex([
+                        'pattern' => '/^[\p{L}\s\'-]+$/u',
+                        'message' => 'Le prénom ne peut contenir que des lettres, espaces, apostrophes ou tirets.',
+                    ]),
+                     new Length(
+                        max: 35,
+                        maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
+                    ),
+                ],
             ])
             ->add('cityUser', TextType::class, [
                 'label' => 'Ville',
                 'required' => false,
+                'constraints' => [
+                    new Assert\Regex([
+                        'pattern' => '/^[\p{L}\s\'-]+$/u',
+                        'message' => 'La ville ne peut contenir que des lettres, espaces, apostrophes ou tirets.',
+                    ]),
+                     new Length(
+                        max: 35,
+                        maxMessage: 'Le nom de la ville ne peut pas dépasser {{ limit }} caractères.'
+                    ),
+                ],
             ])
             ->add('mail_user', EmailType::class, [
                 'label' => 'E-mail',
@@ -53,15 +83,33 @@ class ProfileType extends AbstractType
                 ],
             ])
 
+            ->add('datebirthUser', DateType::class, [
+                'widget' => 'single_text', // pour un input HTML5 type="date"
+                'label' => 'Date de naissance',
+                'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'La date de naissance est obligatoire.'
+                    ]),
+                    new Assert\LessThanOrEqual([
+                        'value' => (new \DateTime())->modify('-18 years'),
+                        'message' => 'Vous devez avoir au moins 18 ans pour modifier votre profil.'
+                    ]),
+                ],
+            ])
+
+
+
+
             ->add('avatarFile', FileType::class, [
-                'label' => 'Avatar (JPG ou PNG)',
+                'label' => 'Avatar (JPG,PNG,WEBP)',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
                     new File([
                         'maxSize' => '2M',
-                        'mimeTypes' => ['image/jpeg', 'image/png'],
-                        'mimeTypesMessage' => 'Veuillez uploader une image JPEG ou PNG valide.',
+                        'mimeTypes' => ['image/jpeg', 'image/png','image/gif','image/webp'],
+                        'mimeTypesMessage' => 'Veuillez uploader une image JPEG, PNG, ou WebP valide.',
                     ]),
                 ],
             ]);

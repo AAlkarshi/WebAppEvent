@@ -5,7 +5,7 @@ Accueil
 {%  endblock %}
 
 {%  block body %}
-<div style="width: 100%; text-align: center; margin-bottom: 30px;">
+<div style="width: 100%; text-align: center; margin-bottom: 30px;  font-family: Quicksand;">
     <h1>Nous retrouver autour d'un événement</h1>
     <h3>Vous préparez un événement ? Ne restez plus seul ! Retrouvez-vous autour d’une activité tous ensemble.</h3>
 </div>
@@ -46,7 +46,7 @@ Accueil
     <div class="date-filter">
         <label for="start_date">📅 À partir du :</label>
         <input type="date" id="start_date" name="start_date" value="{{ startDate ?? '' }}">
-
+<br>
         <label for="end_date">📅 Jusqu'au :</label>
         <input type="date" id="end_date" name="end_date" value="{{ endDate ?? '' }}">
     </div>
@@ -85,10 +85,10 @@ Accueil
 
 
         {% if events is empty %}
-    <p>Vous n’avez créé aucun événement pour le moment.</p>
+    <p style="font-family: Quicksand;">Vous n’avez créé aucun événement pour le moment.</p>
 {% else %}
     {# Affiche le nombre total d'événements une seule fois #}
-  <p>
+  <p style="font-family: Quicksand; font-weight: bold;">
     {{ events.getTotalItemCount }} événement{{ events.getTotalItemCount > 1 ? 's' : '' }} trouvé{{ events.getTotalItemCount > 1 ? 's' : '' }}.
 </p>
    
@@ -311,11 +311,14 @@ Accueil
     font-weight: bold;
     margin-bottom: 10px;
     color: #333;
+    font-family: Quicksand;
 }
 
 .event-meta {
     font-size: 0.9rem;
     color: #555;
+    font-family: Quicksand;
+    font-weight: bold;
 }
 
 .event-category {
@@ -329,10 +332,34 @@ Accueil
 }
 
 
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    height: 40px;
+    width: 100%;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    color: black;
+    border: 1px solid #005791;
+    gap: 5px;
+    margin-top: auto;
+   
+}
 
-
-
-
+{## Boutons S'INSCRIRE & VOIR + #}
+.btn.btn-primary {
+    color: #005791;
+    width: auto;
+    font-size: 20px;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 10px;
+    
+}
 
 
 {# BTN Filtre & Reinitialisation des FILTRES  #}

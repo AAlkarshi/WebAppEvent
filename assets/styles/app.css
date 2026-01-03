@@ -8,9 +8,15 @@
     color: white;
 }
 
+/*
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
+}
+    */
+
+.logo-img {
+    height: 70px;
 }
 
 .nav-links {

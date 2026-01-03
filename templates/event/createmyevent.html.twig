@@ -1,7 +1,5 @@
 {% extends 'base.html.twig' %}
-
 {% block title %}Créer un événement{% endblock %}
-
 {% block body %}
 <section class="event-container">
     <!-- COLONNE GAUCHE -->
@@ -18,41 +16,60 @@
     <div class="event-grid">
         <div class="profile-container">
             <h1>Nouvel événement</h1>
-
             {% for message in app.flashes('success') %}
                 <div class="flash-success">{{ message }}</div>
             {% endfor %}
-
-
             {% for message in app.flashes('error') %}
                 <div class="flash-error">{{ message }}</div>
             {% endfor %}
 
-            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'style':'display:flex;flex-direction:column;gap:15px;width:100%;'}}) }}
-
-                {# Avatar optionnel #}
-                <div class="profile-picture">
-                    <label for="{{ form.image_event.vars.id }}" class="profile-upload">
-                        {{ form_widget(form.image_event) }}
-                    </label>
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', novalidate: 'novalidate',  'data-turbo': 'false', 'style':'display:flex;flex-direction:column;gap:15px;width:100%;'}}) }}
+            {{ form_errors(form) }}
+                <div class="form-group">
+                    {{ form_label(form.image_event) }}
+                    {{ form_widget(form.image_event) }}
+                    {{ form_errors(form.image_event) }}
                 </div>
-
-                {{ form_row(form.title_event) }}
-                {{ form_row(form.description_event) }}
-                {{ form_row(form.dateTime_event) }}
-                {{ form_row(form.duration_event) }}
-                {{ form_row(form.nbx_participant) }}
-                {{ form_row(form.nbx_participant_max) }}
-                {{ form_row(form.category) }}
-                
-                {# Champ Adresse avec label unique "Adresse" #}
-               {{ form_row(form.address) }} {# affichera un seul label "Adresse" #}
-
-
+                <div class="form-group">
+                    {{ form_label(form.title_event) }}
+                    {{ form_widget(form.title_event) }}
+                    {{ form_errors(form.title_event) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.description_event) }}
+                    {{ form_widget(form.description_event) }}
+                    {{ form_errors(form.description_event) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.dateTime_event) }}
+                    {{ form_widget(form.dateTime_event) }}
+                    {{ form_errors(form.dateTime_event) }}
+                </div> 
+                <div class="form-group">
+                    {{ form_label(form.duration_event) }}
+                    {{ form_widget(form.duration_event) }}
+                    {{ form_errors(form.duration_event) }}
+                </div>
+                <div class="form-group">{{ form_label(form.nbx_participant) }}
+                    {{ form_widget(form.nbx_participant) }}
+                    {{ form_errors(form.nbx_participant) }}
+                </div>
+                <div class="form-group"> {{ form_label(form.nbx_participant_max) }}
+                    {{ form_widget(form.nbx_participant_max) }}
+                    {{ form_errors(form.nbx_participant_max) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.category) }}
+                    {{ form_widget(form.category) }}
+                    {{ form_errors(form.category) }}
+                </div>
+                <div class="form-group">
+                    {{ form_errors(form.address) }}
+                    {{ form_row(form.address) }}
+                </div>
                 <div class="form-actions" style="display: flex; justify-content: center; margin-top: 1.5rem;">
                     <button type="submit" class="btn-submit">Créer</button>
                 </div>
-
             {{ form_end(form) }}
         </div>
     </div>
@@ -109,6 +126,53 @@
     justify-content: center;
     align-items: center;
 }
+
+
+/* --- MESSAGES D'ERREUR DE FORMULAIRE --- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Erreurs Symfony */
+.invalid-feedback,
+.form-error-message,
+ul.form-error-list {
+    display: block;
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border-left: 4px solid #d32f2f;
+    margin-top: 5px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    list-style: none;
+}
+
+ul.form-error-list {
+    padding-left: 15px;
+}
+
+ul.form-error-list li {
+    margin: 5px 0;
+}
+
+/* Style des champs en erreur */
+.form-control.is-invalid,
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
+    border-color: #d32f2f;
+    background-color: #fff5f5;
+}
+
+
+
+
+
+
 
 /* --- FORMULAIRE --- */
 .profile-container {

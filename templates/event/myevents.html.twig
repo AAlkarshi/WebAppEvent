@@ -3,139 +3,245 @@
 {% block title %}Mes événements créés{% endblock %}
 
 {% block body %}
-<section class="events-container">
-    <h2>Mes événements créés</h2>
+<section class="event-container">
+    <!-- COLONNE GAUCHE -->
+    <div class="ColonneGauche">
+        <h2>Mes événements</h2>
+        <h5>Voici la liste des événements que vous avez créés</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-calendar"></i>
+            <p>Gérez vos événements facilement</p>
+        </div>
+    </div>
 
-    {% if pagination.items|length == 0 %}
-        <p>Vous n’avez créé aucun événement pour le moment.</p>
-    {% else %}
-        <p>{{ pagination.totalItemCount }} événement{{ pagination.totalItemCount > 1 ? 's' : '' }} trouvé{{ pagination.totalItemCount > 1 ? 's' : '' }}.</p>
+    <!-- COLONNE DROITE -->
+    <div class="event-grid">
+        <div class="profile-container">
 
-        <div class="events-grid">
-            {% for event in pagination %}
-                <div class="event-card">
-                    <div class="event-image-wrapper">
-                        {% if event.imageEvent %}
-                            <img src="{{ asset('uploads/events/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}">
-                        {% else %}
-                            <img src="{{ asset('uploads/events/default.png') }}" alt="Image par défaut">
-                        {% endif %}
-                    </div>
+            {% if pagination.items|length == 0 %}
+                <p style="font-family: Quicksand;font-weight: bold;">Vous n’avez créé aucun événement pour le moment.</p>
 
-                    <div class="event-info">
-                        <h3>{{ event.titleEvent }}</h3>
-                        {% if event.category %}<p><strong>Catégorie :</strong> {{ event.category.nameCategory }}</p>{% endif %}
-                        {% if event.address %}<p><strong>Adresse :</strong> {{ event.address.city }}{% if event.address.address %}, {{ event.address.address }}{% endif %}</p>{% endif %}
-                        <p><strong>Date :</strong> {{ event.dateTimeEvent|date('d/m/Y H:i') }}</p>
-                        {% if event.descriptionEvent %}<p>{{ event.descriptionEvent }}</p>{% endif %}
-                        <p><strong>Participants :</strong> 
-                            {{ event.nbxParticipant }} / 
-                            {{ event.nbxParticipantMax is not empty ? event.nbxParticipantMax : 'Illimité' }}
-                        </p>
-
-                        <div class="event-actions">
-                            <a href="{{ path('view_myevent', {id: event.id}) }}" class="btn-submit">Voir</a>
-                            <a href="{{ path('editmyevent', {id: event.id}) }}" class="btn-submit">Modifier</a>
-                            <a href="{{ path('deletemyevent', {id: event.id}) }}" class="btn-submit btn-danger"
-                               onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
+                <div class="categories-grid">
+                    {% for category in categories %}
+                        <div class="category-card">
+                            <img src="{{ asset('uploads/events/' ~ (categoryImages[category.nameCategory]|default('default.png'))) }}"
+                                alt="{{ category.nameCategory }}">
+                            <p>{{ category.nameCategory }}</p>
                         </div>
-                    </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-        </div>
 
-        <div class="pagination">
-            {{ knp_pagination_render(pagination) }}
+            {% else %}
+                <div class="events-grid">
+                    {% for event in pagination %}
+                        <div class="event-card">
+                            <div class="event-image-wrapper">
+                                {% if event.imageEvent %}
+                                    <img src="{{ asset('uploads/events/' ~ event.imageEvent) }}" alt="{{ event.titleEvent }}">
+                                {% else %}
+                                    <img src="{{ asset('uploads/events/default.png') }}" alt="Image par défaut">
+                                {% endif %}
+                            </div>
+
+                            <div class="event-info">
+                                <h3>{{ event.titleEvent }}</h3>
+                                {% if event.category %}<p><strong>Catégorie :</strong> {{ event.category.nameCategory }}</p>{% endif %}
+                                {% if event.address %}<p><strong>Adresse :</strong> {{ event.address.city }}{% if event.address.address %}, {{ event.address.address }}{% endif %}</p>{% endif %}
+                                <p><strong>Date :</strong> {{ event.dateTimeEvent|date('d/m/Y H:i') }}</p>
+                                {% if event.descriptionEvent %}<p>{{ event.descriptionEvent }}</p>{% endif %}
+                                <p><strong>Participants :</strong> 
+                                    {{ event.nbxParticipant }} / 
+                                    {{ event.nbxParticipantMax is not empty ? event.nbxParticipantMax : 'Illimité' }}
+                                </p>
+
+                                <div class="event-actions">
+                                    <a href="{{ path('view_myevent', {id: event.id}) }}" class="btn-submit">Voir</a>
+                                    <a href="{{ path('editmyevent', {id: event.id}) }}" class="btn-submit">Modifier</a>
+                                    <a href="{{ path('deletemyevent', {id: event.id}) }}" class="btn-submit btn-danger"
+                                       onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="pagination">
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            {% endif %}
+
         </div>
-    {% endif %}
+    </div>
 </section>
 
 <style>
-.events-container {
+/* --- CONTENEUR GLOBAL --- */
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
     padding: 20px;
+    box-sizing: border-box;
 }
 
-.events-container h2 {
-    text-align: center;
+/* --- COLONNE GAUCHE --- */
+.ColonneGauche {
+    background-color: #005791;
+    width: 40%;
+    padding: 50px 30px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.ColonneGauche h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.ColonneGauche h5 {
+    font-size: 1.2rem;
+    color: #ccc;
     margin-bottom: 20px;
 }
 
-/* --- GRILLE D'ÉVÉNEMENTS --- */
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+/* --- COLONNE DROITE --- */
+.event-grid {
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.profile-container {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
 .events-grid {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 20px;
 }
 
-/* --- CARTE ÉVÉNEMENT --- */
 .event-card {
     display: flex;
-    background-color: #f8f8f8;
-    border-radius: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.event-image-wrapper {
-    width: 250px;
-    flex-shrink: 0;
-    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .event-image-wrapper img {
-    width: 100%;
-    height: 100%;
+    width: 150px;
+    height: 150px;
     object-fit: cover;
 }
 
 .event-info {
-    padding: 20px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .event-info h3 {
     margin: 0;
-    color: #005791;
+    font-size: 1.5rem;
 }
 
 .event-actions {
-    margin-top: 10px;
     display: flex;
     gap: 10px;
+    margin-top: 10px;
 }
 
 .btn-submit {
     background-color: #005791;
     color: white;
-    padding: 8px 15px;
+    padding: 8px 20px;
     border-radius: 6px;
     text-decoration: none;
     font-weight: bold;
+    transition: background-color 0.3s;
 }
 
 .btn-submit:hover {
-    background-color: #003f66;
+    background-color: #00406a;
 }
 
 .btn-danger {
-    background-color: #e74c3c;
+    background-color: #d32f2f;
 }
 
 .btn-danger:hover {
-    background-color: #c0392b;
+    background-color: #a02424;
+}
+
+/* --- CATEGORIES --- */
+.categories-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.category-card {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+    background-color: #fff;
+    padding: 10px;
+}
+
+.category-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.category-card p {
+    margin-top: 8px;
+    font-weight: bold;
+    font-size: 1rem;
 }
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
-    .event-card {
+    .event-container {
         flex-direction: column;
+        height: auto;
+        justify-content: center;
     }
-
-    .event-image-wrapper {
+    .ColonneGauche, .event-grid {
         width: 100%;
-        height: 200px;
+        margin-bottom: 20px;
+    }
+    .profile-container {
+        max-width: 100%;
     }
 }
 </style>

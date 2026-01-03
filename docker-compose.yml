@@ -1,7 +1,19 @@
 version: '3.9'
 
 services:
-  mysql:
+  app:
+    build: .
+    container_name: DBB_webappevent
+    restart: always
+    ports:
+      - "8000:80"   
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      DATABASE_URL: "mysql://user:password@database:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"
+    depends_on:
+      - database
+  database:
     image: mysql:8.0
     container_name: mysql
     restart: always
@@ -11,10 +23,9 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "3309:3306"
     volumes:
       - db_data:/var/lib/mysql
-    
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       interval: 10s
@@ -22,12 +33,12 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
+    container_name: phpmyadmin_test
     restart: always
     depends_on:
-      - mysql
+      - database
     ports:
-      - "8080:80"
+      - "8082:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306

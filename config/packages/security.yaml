@@ -22,9 +22,16 @@ security:
                 username_parameter: mail_user
                 password_parameter: password_user
                 default_target_path: /myprofile  # redirection après login réussi
+
+            login_throttling:
+                max_attempts: 3          # 3 tentatives maximum par min
+                interval: '5 minutes'   # Intervale d'attente
+                
+
             logout:
                 path: logout
                 target: app_events
+                
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

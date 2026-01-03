@@ -20,6 +20,12 @@ class Event
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
+    #[Assert\Length(max: 50)]
+    #[Assert\Regex(
+        pattern: '/^[^<>]*$/',
+        message: 'Le titre ne peut pas contenir de balises HTML.'
+    )]
     private ?string $title_event = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
@@ -30,13 +36,14 @@ class Event
     private ?string $image_event = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 300)]
     private ?string $description_event = null;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: 'datetime', nullable: false)]
     #[Assert\NotBlank(message: "La date de l'événement est obligatoire.")]
     #[Assert\GreaterThanOrEqual(
     value: "now",
-    message: "⚠️ La date et l'heure de l'événement doivent être dans le futur (au moins à la minute actuelle).")]
+    message: "La date et l'heure de l'événement doivent être dans le futur (au moins à la minute actuelle).")]
     private ?\DateTime $dateTime_event = null;
 
     #[ORM\Column(nullable: true)]

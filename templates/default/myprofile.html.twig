@@ -3,77 +3,130 @@
 {% block title %}Mon Profil{% endblock %}
 
 {% block body %}
-<section class="profile-container">
-    <div class="profile-card">
-        <h1>Mon Profil</h1>
+<section class="profile-page-container">
+    <!-- COLONNE GAUCHE -->
+    <div class="profile-left-column">
+        <h2>Mon Profil</h2>
+        <h5>Gérez vos informations personnelles</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-user"></i>
+            <p>{{ user.firstnameUser }} {{ user.lastnameUser }}</p>
+        </div>
+    </div>
 
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="flash-{{ label }}">{{ message }}</div>
+    <!-- COLONNE DROITE -->
+    <div class="profile-right-column">
+        <div class="profile-card">
+            <h1>Mon Profil</h1>
+
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="flash-{{ label }}">{{ message }}</div>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
 
-        <div class="profile-info">
-            <div class="avatar">
-                <img src="{{ asset('uploads/avatars/' ~ (user.avatarUser ?? 'default.png')) }}" alt="Avatar" />
-            </div>
+            <div class="profile-info">
+                <div class="avatar">
+                    <img src="{{ asset('uploads/avatars/' ~ (user.avatarUser ?? 'default.png')) }}" alt="Avatar" />
+                </div>
 
-            <ul>
-                <li><strong>Nom :</strong> {{ user.lastnameUser }}</li>
-                <li><strong>Prénom :</strong> {{ user.firstnameUser }}</li>
-                <li><strong>Email :</strong> {{ user.mailUser }}</li>
-                <li><strong>Ville :</strong> {{ user.cityUser }}</li>
-                <li><strong>Date de naissance :</strong> {{ user.datebirthUser|date('d/m/Y') }}</li>
-                <li><strong>Date de création :</strong> {{ user.dateCreation|date('d/m/Y') }}</li>
-                <li><strong>Rôle :</strong> {{ user.role.value }}</li>
-            </ul>
+                <ul>
+                    <li><strong>Nom :</strong> {{ user.lastnameUser }}</li>
+                    <li><strong>Prénom :</strong> {{ user.firstnameUser }}</li>
+                    <li><strong>Email :</strong> {{ user.mailUser }}</li>
+                    <li><strong>Ville :</strong> {{ user.cityUser }}</li>
+                    <li><strong>Date de naissance :</strong> {{ user.datebirthUser|date('d/m/Y') }}</li>
+                    <li><strong>Date de création :</strong> {{ user.dateCreation|date('d/m/Y') }}</li>
+                    <li><strong>Rôle :</strong> {{ user.role.value }}</li>
+                </ul>
 
-   {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false'}}) }}
+                {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false'}}) }}
+                <div class="form-fields">
+                    {{ form_row(form.lastnameUser) }}
+                    {{ form_row(form.firstnameUser) }}
+                    {{ form_row(form.cityUser) }}
+                    {{ form_row(form.mail_user) }}
+                    {{ form_row(form.plainPassword) }}
+                    <button type="button" class="btn-show-password" data-password-target="{{ form.plainPassword.vars.id }}" aria-pressed="false">Voir</button>
+                    {{ form_row(form.avatarFile) }}
+                    {{ form_row(form.datebirthUser) }}
 
-<div class="form-fields" style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
-    {{ form_row(form.lastnameUser) }}
-    {{ form_row(form.firstnameUser) }}
-    {{ form_row(form.cityUser) }}
-    {{ form_row(form.mail_user) }}
-    {{ form_row(form.plainPassword) }}
-    <button type="button" class="btn-show-password"   data-password-target="{{ form.plainPassword.vars.id }}" aria-pressed="false">Voir</button>
-    {{ form_row(form.avatarFile) }}
-</div>
+                </div>
 
-<div style="display: flex; justify-content: center; margin-top: 1.5rem;">
-    <button class="btn-update">Mettre à jour</button>
-</div>
+                <div class="form-actions">
+                    <button class="btn-update">Mettre à jour</button>
+                </div>
+                {{ form_end(form) }}
 
-{{ form_end(form) }}
-
-
-
-            <div class="profile-actions">
-                
-                <a href="{{ path('logout') }}" class="logout-btn">Déconnexion</a>
-                
-                <form action="{{ path('delete_account') }}" method="post" onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete-account') }}">
-                    <button type="submit" class="delete-btn">Supprimer le compte</button>
-                </form>
+                <div class="profile-actions">
+                    <a href="{{ path('logout') }}" class="logout-btn">Déconnexion</a>
+                    <form action="{{ path('delete_account') }}" method="post" onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete-account') }}">
+                        <button type="submit" class="delete-btn">Supprimer le compte</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <style>
-.profile-container {
+/* --- CONTENEUR GLOBAL --- */
+.profile-page-container {
     display: flex;
-    justify-content: center;
-    margin-top: 40px;
+    min-height: 100vh;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
+/* --- COLONNE GAUCHE --- */
+.profile-left-column {
+    background-color: #005791;
+    color: white;
+    width: 25%;
+    min-height: 100vh;
+    padding: 40px 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.profile-left-column h2 {
+    font-size: 2rem;
+}
+
+.profile-left-column h5 {
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- COLONNE DROITE --- */
+.profile-right-column {
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- PROFILE CARD --- */
 .profile-card {
     background-color: #f9f9f9;
     border-radius: 15px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     padding: 30px;
-    width: 400px;
+    width: 100%;
+    max-width: 500px;
     text-align: center;
 }
 
@@ -82,6 +135,7 @@
     margin-bottom: 20px;
 }
 
+/* --- AVATAR --- */
 .avatar img {
     width: 120px;
     height: 120px;
@@ -90,11 +144,12 @@
     margin-bottom: 20px;
 }
 
+/* --- INFOS --- */
 .profile-info ul {
     list-style: none;
     padding: 0;
     color: #333;
-    text-align: left;
+    text-align: center; /* centré */
 }
 
 .profile-info li {
@@ -102,80 +157,72 @@
     font-size: 16px;
 }
 
+/* --- FORMULAIRE --- */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
 .btn-update {
     background-color: #007bff;
     color: white;
-    padding: 10px 15px;
+    padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    margin-top: 10px;
+    cursor: pointer;
 }
 
+/* --- BOUTONS COMPACTS --- */
 .profile-actions {
     margin-top: 25px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    align-items: center; /* centrés et pas full width */
 }
 
 .logout-btn,
-.forgot-btn,
-.delete-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-
-{# Btn pour voir MDP en clair #}
+.delete-btn,
 .btn-show-password {
-    margin-top: 5px;
-    background: #005791;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
     cursor: pointer;
-    font-size: 0.9rem;
-}
-.btn-show-password:hover {
-    background: #003f66;
 }
 
+/* couleurs des boutons */
+.logout-btn { background-color: #005791; color:white; }
+.logout-btn:hover { background-color: #003f66; }
 
-.logout-btn { background-color: #005791; }
-.logout-btn:hover { background-color: #003f6e; }
-
-.forgot-btn { background-color: #ffc107; color: #333; }
-.forgot-btn:hover { background-color: #e0a800; color: white; }
-
-.delete-btn { background-color: #dc3545; }
+.delete-btn { background-color: #dc3545; color:white; }
 .delete-btn:hover { background-color: #b02a37; }
+
+.btn-show-password { background-color: #005791; color:white; }
+.btn-show-password:hover { background-color: #003f66; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .profile-page-container {
+        flex-direction: column;
+    }
+    .profile-left-column,
+    .profile-right-column {
+        width: 100%;
+    }
+}
 </style>
-
-
-
-
-<script>
-const togglePasswordLogin = document.getElementById('togglePasswordLogin');
-const passwordLoginInput = document.getElementById('password');
-
-togglePasswordLogin.addEventListener('click', function () {
-    const type = passwordLoginInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordLoginInput.setAttribute('type', type);
-    this.textContent = type === 'password' ? 'Voir' : 'Cacher';
-});
-</script>
 
 <script>
 document.addEventListener('click', function(e) {
-  // si on clique un bouton qui a data-password-target
   const btn = e.target.closest('button[data-password-target]');
   if (!btn) return;
 
@@ -183,17 +230,13 @@ document.addEventListener('click', function(e) {
   const input = document.getElementById(targetId);
   if (!input) return;
 
-  // toggle type
   const isPassword = input.getAttribute('type') === 'password';
   input.setAttribute('type', isPassword ? 'text' : 'password');
 
-  // accessible state + label
   btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
   btn.textContent = isPassword ? 'Cacher' : 'Voir';
 
-  // move focus back to the input so user can continue typing
   input.focus();
 });
 </script>
-
 {% endblock %}

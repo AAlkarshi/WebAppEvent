@@ -1,0 +1,4 @@
+framework:
+    lock:
+        default: flock
+        #lock: '%env(LOCK_DSN)%'

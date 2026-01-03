@@ -1,7 +1,7 @@
 <nav class="navbar">
     <div class="navbar-left">
-       <!-- <img src="{{ asset('Logo.png') }}" alt="Logo" class="logo-img"> -->
-       <h3 style="font-family: Quicksand;"> Eventify </h3>
+       <img src="{{ asset('LogoEventify.png') }}" alt="Logo" class="logo-img">
+       <!-- <h3 style="font-family: Quicksand;"> Eventify </h3> -->
     </div>
 
     <!-- Icône du menu burger -->
@@ -28,7 +28,7 @@
             <li><a href="{{ path('createmyevent') }}">Créer mon événement</a></li>
             <li><a href="{{ path('myprofile') }}">Mon profil</a></li>
             <li>
-                <a href="{{ path('logout') }}"
+                <a href="{{ path('logout', {_csrf_token: csrf_token('logout')}) }}"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                    Déconnexion
                 </a>

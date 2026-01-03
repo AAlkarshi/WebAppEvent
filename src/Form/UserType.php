@@ -58,6 +58,15 @@ class UserType extends AbstractType
             ->add('datebirth_user', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de naissance',
+                 'constraints' => [
+                    new Assert\NotBlank(
+                        message: 'Veuillez renseigner votre date de naissance.'
+                    ),
+                    new Assert\LessThanOrEqual(
+                        value: '-18 years',
+                        message: 'Vous devez avoir au moins 18 ans pour vous inscrire.'
+                    ),
+                ],
             ])
             ->add('mail_user', EmailType::class, [
                 'label' => 'Adresse e-mail',

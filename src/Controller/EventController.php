@@ -29,77 +29,61 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 
 
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class EventController extends AbstractController
 {
     #[Route('/events', name: 'app_events')]
     public function list(Request $request, PaginatorInterface $paginator, EventRepository $eventRepository , CategoryRepository $categoryRepository): Response {
-        // 🔹 Récupère toutes les catégories pour la liste déroulante
+        // Récup toutes Catégories pour la liste déroulante
         $categories = $categoryRepository->findAll();
 
-        // 🔹 Récupère l'ID de catégorie envoyé dans l'URL (GET)
+        // Récup l'ID de catégorie envoyé dans l'URL (GET)
         $categoryId = $request->query->get('id_category');
-
-        // 🔹 Récupère la ville recherchée
         $searchCity = $request->query->get('terme');
 
-        // 🔹 Récupère les dates de filtre
+        // Récup les dates de filtre
         $startDate = $request->query->get('start_date');
         $endDate = $request->query->get('end_date');
 
-        // 🔹 Construction de la requête avec QueryBuilder
+        // Construction de la requête avec QueryBuilder et ici Jointure sécu
         $qb = $eventRepository->createQueryBuilder('e')
             ->leftJoin('e.address', 'a')->addSelect('a')
             ->leftJoin('e.category', 'c')->addSelect('c');
 
+        // Masquage des événements passés de plus de 3 jours et filtre pour garder ceux qui ne sont pas passés
+        $limitDate = new \DateTimeImmutable('-3 days'); 
+        $qb->andWhere('e.dateTime_event >= :limit') ->setParameter('limit', $limitDate);
 
-        // Masquage des événements passés de plus de 3 jours
-        $limitDate = new \DateTimeImmutable('-3 days'); // La limite est 3 jours avant aujourd'hui
-        $qb->andWhere('e.dateTime_event >= :limit') // On filtre pour ne garder que ceux qui ne sont pas passés
-        ->setParameter('limit', $limitDate);
-
-       
-
-        // 🔹 Si une catégorie est sélectionnée, on filtre
+        // Si une caté est sélectionnée, on filtre
         if ($categoryId) {
-            $qb->andWhere('c.id = :catId')
-            ->setParameter('catId', $categoryId);
+            $qb->andWhere('c.id = :catId') ->setParameter('catId', $categoryId);
         }
 
-        // 🏙️ Filtrage par ville
+        // Filtrage par ville
         if ($searchCity) {
-            $qb->andWhere('LOWER(a.city) LIKE :city')
-            ->setParameter('city', '%'.mb_strtolower($searchCity).'%');
+            $qb->andWhere('LOWER(a.city) LIKE :city') ->setParameter('city', '%'.mb_strtolower($searchCity).'%');
         }
 
-        // 🔹 Filtrage par date
+        // Filtrage par date
         if ($startDate) {
-            $qb->andWhere('e.dateTime_event >= :start')
-            ->setParameter('start', new \DateTime($startDate));
+            $qb->andWhere('e.dateTime_event >= :start') ->setParameter('start', new \DateTime($startDate));
         }
         if ($endDate) {
-            $end = new \DateTimeImmutable($endDate . ' 23:59:59'); // inclure toute la journée
-            $qb->andWhere('e.dateTime_event <= :end')
-            ->setParameter('end', $end);
+            $end = new \DateTimeImmutable($endDate . ' 23:59:59'); 
+            $qb->andWhere('e.dateTime_event <= :end') ->setParameter('end', $end);
         }
 
-        // 🔹 Tri par date croissante
+        // Tri par date croissante ASCENDANTE
         $qb->orderBy('e.dateTime_event', 'ASC');
 
-        // 🔹 Exécution de la requête
+        // Exécution de la requête
         $events = $qb->getQuery()->getResult();
 
+        // Pagination et nbx d'event par page
+        $pagination = $paginator->paginate( $qb, $request->query->getInt('page', 1), 8);
 
-        // 🔹 Pagination
-        $pagination = $paginator->paginate(
-            $qb, // Query ou QueryBuilder
-            $request->query->getInt('page', 1), // Numéro de page
-            8 // Nbx d'évent par page
-        );
-
-       
-
-        // 🔹 Rendu Twig
         return $this->render('event/list.html.twig', [
             'events' => $pagination,
             'categories' => $categories,
@@ -108,10 +92,6 @@ class EventController extends AbstractController
             'startDate' => $startDate,
             'endDate' => $endDate,
         ]);
-
-
-       
-
 }
 
 
@@ -135,80 +115,85 @@ class EventController extends AbstractController
     }
 
 
-    //CREER MON EVENT
-   #[Route('/events/createmyevent', name: 'createmyevent')]
-public function createMyEvent(Request $request, EventRepository $eventRepository, Security $security, EntityManagerInterface $em): Response {
-    $event = new Event();
-    $event->setCreatedBy($this->getUser());
-    $event->setNbxParticipant(1); // valeur par DEF pour l'affichage, mais on vérifiera après la saisie
+    
 
-    $form = $this->createForm(EventType::class, $event);
-    $form->handleRequest($request);
+  
 
-    if ($form->isSubmitted() && $form->isValid()) {
 
-        // Récup les valeurs saisies par l'USER
-        $nbxParticipant = $form->get('nbx_participant')->getData();
-        $nbxParticipantMax = $form->get('nbx_participant_max')->getData();
 
-        //  Vérifie si nbxuser est pas > à nbxuserMAX
-        if ($event->getNbxParticipant() > $event->getNbxParticipantMax()) {
-            $this->addFlash('error', '⚠️ Le nombre de participants ne peut pas dépasser le nombre maximum autorisé.');
-            return $this->redirectToRoute('createmyevent');
+
+
+
+
+
+
+    // CREER MON EVENT
+    #[Route('/events/createmyevent', name: 'createmyevent')]
+    public function createMyEvent(Request $request,EventRepository $eventRepository,Security $security,EntityManagerInterface $em): Response {
+        $event = new Event();
+        $event->setCreatedBy($this->getUser());
+        $event->setNbxParticipant(1); // valeur par DEF pour l'affichage
+        $form = $this->createForm(EventType::class, $event);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            return $this->render('event/createmyevent.html.twig', ['form' => $form->createView(),]);
         }
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($event->getDateTimeEvent() === null) {
+                $this->addFlash('error', 'La date et l\'heure sont obligatoires.');
+                return $this->render('event/createmyevent.html.twig', [ 'form' => $form->createView(),]);
+            }
+            
+            $nbxParticipant = $form->get('nbx_participant')->getData();
+            $nbxParticipantMax = $form->get('nbx_participant_max')->getData();
+            if ($nbxParticipantMax !== null && $nbxParticipant > $nbxParticipantMax) {
+                $this->addFlash('error','Le nombre de participants ne peut pas dépasser le nombre maximum autorisé.');
+                return $this->render('event/createmyevent.html.twig', ['form' => $form->createView(),]);
+        }   
+            $user = $security->getUser();
+            $imageFile = $form->get('image_event')->getData();
+            if ($imageFile) {
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                $imageFile->move($this->getParameter('event_images_directory'),$newFilename);
+                $event->setImageEvent($newFilename);
+            } else {
+                // Image par déf selon la catégorie
+                $category = $event->getCategory()
+                    ? strtolower($event->getCategory()->getNameCategory()) : 'default';
+                $defaultImage = match ($category) {
+                    'jeux vidéo' => 'jeuxvideo.jpg',
+                    'jeux de société' => 'jeuxdesociete.jpg',
+                    'course' => 'course.jpg',
+                    'promenade' => 'promenade.jpg',
+                    'restauration' => 'restauration.jpg',
+                    'sport' => 'sport.jpg',
+                    'poker' => 'poker.jpg',
+                    'cinéma' => 'cinema.jpg',
+                    'concert' => 'concert.jpg',
+                    default => 'autreévènement.jpg',
+                };
+                $event->setImageEvent($defaultImage);
+            }
 
-        $user = $security->getUser();
-
-        // Gestion de l'image
-        $imageFile = $form->get('image_event')->getData();
-        if ($imageFile) {
-            $newFilename = uniqid().'.'.$imageFile->guessExtension();
-            $imageFile->move(
-                $this->getParameter('event_images_directory'),
-                $newFilename
-            );
-            $event->setImageEvent($newFilename);
-        } else {
-            $category = $event->getCategory() ? strtolower($event->getCategory()->getNameCategory()) : 'default';
-            $defaultImage = match ($category) {
-                'jeux vidéo' => 'jeuxvideo.jpg',
-                'jeux de société' => 'jeuxdesociete.jpg',
-                'course' => 'course.jpg',
-                'promenade' => 'promenade.jpg',
-                'restauration' => 'restauration.jpg',
-                'sport' => 'sport.jpg',
-                'poker' => 'poker.jpg',
-                'cinéma' => 'cinema.jpg',
-                'concert' => 'concert.jpg',
-                default => 'autreévènement.jpg',
-            };
-            $event->setImageEvent($defaultImage);
+            $address = $form->get('address')->getData();
+            $event->setAddress($address);
+            $register = new Register();
+            $register->setEvent($event);
+            $register->setUser($user);
+            $register->setActive(true);
+            $event->addRegister($register);
+            $event->setNbxParticipant(count($event->getRegisters()));
+            $em->persist($event);
+            $em->persist($register);
+            $em->flush();
+            $this->addFlash('success','Événement créé avec succès ! Vous êtes automatiquement inscrit.');
+            return $this->redirectToRoute('app_events');
         }
-
-        // Récup les valeurs saisies par l'USER pr Adresse
-        $address = $form->get('address')->getData();
-        $event->setAddress($address);
-
-        // Créateur s'inscrit à son évéent 
-        $register = new Register();
-        $register->setEvent($event);
-        $register->setUser($user);
-        $register->setActive(true);
-
-        $event->addRegister($register);
-        $event->setNbxParticipant(count($event->getRegisters()));
-
-        $em->persist($event);
-        $em->persist($register);
-        $em->flush();
-
-        $this->addFlash('success', '🎉 Événement créé avec succès ! Vous êtes automatiquement inscrit.');
-        return $this->redirectToRoute('app_events');
-    }
-
-    return $this->render('event/createmyevent.html.twig', [
-        'form' => $form->createView(),
-    ]);
+        return $this->render('event/createmyevent.html.twig', [
+            'form' => $form->createView(),
+        ]);
 }
 
 
@@ -337,7 +322,7 @@ public function createMyEvent(Request $request, EventRepository $eventRepository
 
 // LISTE DES MES EVENEMNTS QUE J'AI CREER
     #[Route('/myevents', name: 'myevents')]
-    public function myEvents(EventRepository $eventRepository, Request $request, PaginatorInterface $paginator): Response {
+    public function myEvents(EventRepository $eventRepository, CategoryRepository $categoryRepository, Request $request, PaginatorInterface $paginator): Response {
         $user = $this->getUser();
 
         $query = $eventRepository->createQueryBuilder('e')
@@ -349,11 +334,32 @@ public function createMyEvent(Request $request, EventRepository $eventRepository
         $pagination = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1), // page actuelle
-            3 // nb d'événements par page
+            5 // nb d'événements par page
         );
+
+        // 🔹 Récupérer toutes les catégories avec image
+        $categories = $categoryRepository->findAll();
+
+        // 🔹 Mapping catégorie → image
+        $categoryImages = [
+            'Jeux Vidéo' => 'jeuxvideo.jpg',
+            'Musique'    => 'musique.jpg',
+            'Sport'     => 'sport.jpg',
+            'Cinéma'     => 'cinema.jpg',
+            'Concert'    => 'concert.jpg',
+            'Course'     => 'course.jpg',
+            'Promenade'  => 'promenade.jpg',
+            'Restauration' => 'restauration.jpg',
+            'Poker'      => 'poker.jpg',
+            'Sortie'      => 'sortie.jpg',
+            'Jeux de Société' => 'jeuxdesociete.jpg',
+            'Autre'     => 'autreévènement.jpg'
+        ];
 
         return $this->render('event/myevents.html.twig', [
             'pagination' => $pagination,
+            'categories' => $categories,
+            'categoryImages' => $categoryImages
         ]);
     }
 
@@ -363,7 +369,8 @@ public function createMyEvent(Request $request, EventRepository $eventRepository
 
 // MODIFIER MON EVENT
 #[Route('/event/{id}/edit', name: 'editmyevent')]
-public function editmyevent(Event $event, Request $request, EntityManagerInterface $em): Response {
+public function editmyevent(Event $event, Request $request, EntityManagerInterface $em): Response
+{
     if ($event->getCreatedBy() !== $this->getUser()) {
         throw $this->createAccessDeniedException("Vous n'êtes pas autorisé à modifier cet événement.");
     }
@@ -371,31 +378,38 @@ public function editmyevent(Event $event, Request $request, EntityManagerInterfa
     $form = $this->createForm(EventType::class, $event);
     $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted()) {
 
-    $nbxParticipantMax = $form->get('nbx_participant_max')->getData(); // valeur saisie
-    $nbxParticipantActuel = $event->getNbxParticipant(); // nombre déjà inscrit
+        $nbxParticipantMax = $form->get('nbx_participant_max')->getData();
+        $nbxParticipantActuel = $event->getNbxParticipant();
 
-    if ($nbxParticipantActuel > $nbxParticipantMax) {
-        $this->addFlash('error', '⚠️ Le nombre de participants ne peut pas dépasser le nombre maximum autorisé.');
-        return $this->redirectToRoute('editmyevent', ['id' => $event->getId()]);
+        // ❌ ERREUR MÉTIER
+        if ($nbxParticipantActuel > $nbxParticipantMax) {
+            $form->get('nbx_participant_max')->addError(
+                new FormError('Le nombre maximum ne peut pas être inférieur au nombre de participants déjà inscrits.')
+            );
+        }
+
+        // ✅ SI TOUT EST OK
+        if ($form->isValid()) {
+
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image_event')->getData();
+            if ($imageFile) {
+                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $imageFile->move(
+                    $this->getParameter('avatars_directory'),
+                    $newFilename
+                );
+                $event->setImageEvent($newFilename);
+            }
+
+            $em->flush();
+
+            $this->addFlash('success', 'Événement modifié avec succès.');
+            return $this->redirectToRoute('app_events');
+        }
     }
-
-    /** @var UploadedFile $imageFile */
-    $imageFile = $form->get('image_event')->getData();
-    if ($imageFile) {
-        $newFilename = uniqid().'.'.$imageFile->guessExtension();
-        $imageFile->move(
-            $this->getParameter('avatars_directory'),
-            $newFilename
-        );
-        $event->setImageEvent($newFilename);
-    }
-
-    $em->flush();
-    $this->addFlash('success', 'Événement modifié avec succès.');
-    return $this->redirectToRoute('app_events');
-}
 
     return $this->render('event/editevent.html.twig', [
         'form' => $form->createView(),
@@ -403,6 +417,7 @@ public function editmyevent(Event $event, Request $request, EntityManagerInterfa
         'currentImage' => $event->getImageEvent(),
     ]);
 }
+
 
 
 
