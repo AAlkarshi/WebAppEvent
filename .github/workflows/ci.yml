@@ -67,11 +67,15 @@ jobs:
       - name: 🔍 Verification de la connexion MySQL
         run: mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
-      - name: 🗄️ Setup database schema
+      - name: Setup database schema
         run: |
-          php bin/console doctrine:schema:drop --env=test --force || true
           php bin/console doctrine:schema:create --env=test
-          php bin/console cache:clear --env=test
+
+      - name: 📥 Charger les fixtures
+        run: |
+          php bin/console doctrine:fixtures:load --no-interaction --env=test
+
+
 
       - name: ✅ Check PHP syntax
         run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
@@ -136,29 +140,46 @@ jobs:
  
   
   deploiement-infos:
-    name: 📢 Instructions de déploiement
+    name: Instructions de déploiement
     needs: deploy
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     
     steps:
-      - name: 📢 Guide de déploiement
-        run: |
-          echo "============================================"
-          echo "🚀 VOTRE APPLICATION EST PRÊTE"
-          echo "============================================"
-          echo ""
-          echo "L'artefact de build a été créé avec succès !"
-          echo ""
-          echo "📥 POUR DÉPLOYER:"
-          echo "1. Allez dans l'onglet 'Actions' de votre repo GitHub"
-          echo "2. Cliquez sur ce workflow"
-          echo "3. Téléchargez l'artefact: symfony-build-${{ github.sha }}"
-          echo "4. Extrayez et uploadez sur votre serveur"
-          echo ""
-          echo "🔧 SUR VOTRE SERVEUR:"
-          echo "   tar -xzf symfony-app-${{ github.sha }}.tar.gz"
-          echo "   php bin/console doctrine:migrations:migrate"
-          echo "   php bin/console cache:clear --env=prod"
-          echo ""
-          echo "============================================"
+    - name: 📢 Guide de déploiement
+      run: |
+        echo "============================================"
+        echo "VOTRE APP EST PRÊTE"
+        echo "============================================"
+        echo ""
+        echo "L'artefact de build a été créé avec succès !"
+        echo ""
+        echo "📥 POUR DÉPLOYER AVEC DOCKER:"
+        echo "1. Téléchargez l'artefact depuis GitHub Actions"
+        echo "2. Extrayez l'archive"
+        echo "3. Lancez les commandes suivantes:"
+        echo ""
+        echo "   # Extraire l'artefact"
+        echo "   tar -xzf symfony-app-${{ github.sha }}.tar.gz"
+        echo "   cd symfony-app-*"
+        echo ""
+        echo "   # Lancer Docker"
+        echo "   docker compose up -d --build"
+        echo ""
+        echo "   # Attendre MySQL (20 secondes)"
+        echo "   sleep 20"
+        echo ""
+        echo "   # Créer le schéma de BDD"
+        echo "   docker exec -it DBB_webappevent php bin/console doctrine:schema:drop --full-database --force --env=prod || true"
+        echo "   docker exec -it DBB_webappevent php bin/console doctrine:schema:create --env=prod"
+        echo ""
+        echo "   # Vider le cache"
+        echo "   docker exec -it DBB_webappevent php bin/console cache:clear --env=prod"
+        echo ""
+        echo "   # Charger des données de test (optionnel)"
+        echo "   docker exec -it DBB_webappevent php bin/console doctrine:fixtures:load --no-interaction --env=prod"
+        echo ""
+        echo "App disponible sur http://localhost:8000"
+        echo "PHPMyAdmin sur http://localhost:8082"
+        echo ""
+        echo "============================================"
