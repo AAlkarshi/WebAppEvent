@@ -71,12 +71,6 @@ jobs:
         run: |
           php bin/console doctrine:schema:create --env=test
 
-      - name: 📥 Charger les fixtures
-        run: |
-          php bin/console doctrine:fixtures:load --no-interaction --env=test
-
-
-
       - name: ✅ Check PHP syntax
         run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
 
