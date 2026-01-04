@@ -110,21 +110,6 @@ jobs:
             APP_ENV: prod
         run: composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-      - name: 📦 Préparer l'artefact complet
-        run: |
-          rm -rf build
-          mkdir build
-
-          # Copier tous les fichiers nécessaires dans build/
-          cp -r bin config public src translations vendor build/
-          cp composer.json composer.lock Dockerfile docker-entrypoint.sh build/
-
-          echo "Contenu de build/"
-          ls -R build
-
-          # Créer l'archive depuis build/
-          cd build
-          tar -czf ../artifacts/symfony-app-${{ github.sha }}.tar.gz .
 
       - name: 📤 Uploader l'artefact
         uses: actions/upload-artifact@v4
