@@ -79,10 +79,13 @@ jobs:
         run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
 
 
-      - name: Run specific controller tests
+      - name: 🎯 Run specific controller tests
+        env:
+          DATABASE_URL: "mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"
+          APP_ENV: test
         run: |
-          php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
-          php bin/phpunit tests/Controller/EventControllerTest.php --testdox
+          vendor/bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
+          vendor/bin/phpunit tests/Controller/EventControllerTest.php --testdox
 
       - name: 📊 Test Summary
         if: always()
