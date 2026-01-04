@@ -120,16 +120,6 @@ jobs:
           tar -czf artifacts/symfony-app-${{ github.sha }}.tar.gz --exclude='artifacts' .
           ls -lart 
 
-      - name: 📦 Préparer l'artefact
-        run: |
-          rm -rf build
-          mkdir build
-          cp -r bin config public src translations vendor build/
-          cp composer.json composer.lock build/
-          cp .dockerignore Dockerfile build/
-          cd build
-          tar -czf ../artifacts/symfony-app-${{ github.sha }}.tar.gz 
-
       - name: 📤 Uploader l'artefact
         uses: actions/upload-artifact@v4
         with:
