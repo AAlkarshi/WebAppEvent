@@ -112,8 +112,17 @@ jobs:
 
       - name: 📦 Créer l'archive de déploiement
         run: |
+          echo "Dossier courant:"
+          pwd
+          echo "Contenu du dossier avant archivage:"
+          ls -la
           mkdir -p artifacts
-          tar -czf artifacts/symfony-app-${{ github.sha }}.tar.gz .
+          tar -czf artifacts/symfony-app-${{ github.sha }}.tar.gz --exclude='artifacts' --exclude='.git' .
+          echo "Contenu du dossier artifacts après archivage:"
+          ls -la artifacts
+
+      - name: Vérifier le contenu de l'archive
+        run: tar -tzf artifacts/symfony-app-${{ github.sha }}.tar.gz | head -20
 
       - name: 📤 Uploader l'artefact
         uses: actions/upload-artifact@v4
