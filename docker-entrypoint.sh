@@ -4,6 +4,12 @@
 # Stoppe le script si erreur
 set -e
 
+#Evite les bugs aléatoire, mauvais cache et erreur DebugBundle
+export APP_ENV=prod
+export APP_DEBUG=0
+
+
+
 # Variables MySQL (adapter si nécessaire)
 DB_HOST=${DB_HOST:-database}
 DB_PORT=${DB_PORT:-3306}
@@ -24,12 +30,21 @@ function wait_for_mysql() {
 # Attendre MySQL
 wait_for_mysql
 
-# Clear cache Symfony
-php bin/console cache:clear
 
-# Execute migrations et fixtures
-php bin/console doctrine:migrations:migrate --no-interaction
-php bin/console doctrine:fixtures:load --no-interaction
+
+echo "🗄 Création base si absente"
+php bin/console doctrine:database:create --if-not-exists --env=prod
+
+echo "📐 Mise à jour schéma"
+#php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console doctrine:schema:update --force --env=prod
+
+echo "📦 Chargement des fixtures"
+#php bin/console doctrine:fixtures:load --no-interaction
+php bin/console doctrine:fixtures:load --no-interaction --env=prod || true
+
+echo "🔥 Cache prod"
+php bin/console cache:clear --env=prod
 
 # Lancer Apache en foreground
 exec apache2-foreground

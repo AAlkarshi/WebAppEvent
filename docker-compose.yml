@@ -13,12 +13,6 @@ services:
       DATABASE_URL: "mysql://user:password@database:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"
     depends_on:
       - database
-    command: >
-      bash -c "
-      php bin/console doctrine:schema:create --env=dev &&
-      php bin/console doctrine:fixtures:load --no-interaction --env=dev &&
-      apache2-foreground
-      "
   database:
     image: mysql:8.0
     container_name: mysql

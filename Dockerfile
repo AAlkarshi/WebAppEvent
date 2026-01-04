@@ -37,7 +37,11 @@ RUN composer install --no-dev --optimize-autoloader \
  && composer dump-env prod \
  && php bin/console cache:clear
 
-# Render détecte automatiquement le port 80
+
+
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

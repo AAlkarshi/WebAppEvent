@@ -1,0 +1,28 @@
+# Dépendances
+/vendor/
+/node_modules/
+
+# Cache et logs
+/var/
+.env.local
+.env.local.php
+.env.*.local
+
+# Build et compilation
+/public/build/
+/public/bundles/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
