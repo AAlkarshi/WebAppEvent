@@ -25,10 +25,10 @@ jobs:
           --health-retries=10
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
@@ -36,7 +36,7 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
-      - name: Cache Composer dependencies
+      - name: 💾 Cache Composer dependencies
         uses: actions/cache@v3
         with:
           path: vendor
@@ -44,10 +44,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Install Composer dependencies
+      - name: 📦 Install Composer dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-reqs
 
-      - name: Setup environment
+      - name: ⚙️ Setup environment
         run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
@@ -57,7 +57,7 @@ jobs:
         run: |
           for i in {1..60}; do
             if mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SELECT 1" 2>/dev/null; then
-              echo "MySQL is ready"
+              echo "✅ MySQL is ready"
               break
             fi
             echo "⏳ Waiting for MySQL... ($i/60)"
@@ -68,24 +68,21 @@ jobs:
         run: mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
       - name: Setup database schema
-        env:
-          DATABASE_URL: "mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"
-        run: |
+        run: |          
           php bin/console doctrine:database:create --if-not-exists --env=test
           php bin/console doctrine:schema:create --env=test
           php bin/console doctrine:fixtures:load --no-interaction --env=test
+          
+          
 
-      - name: Check PHP syntaxe
+      - name: ✅ Check PHP syntax
         run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
 
 
       - name: 🎯 Run specific controller tests
-        env:
-          DATABASE_URL: "mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"
-          APP_ENV: test
         run: |
-          vendor/bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
-          vendor/bin/phpunit tests/Controller/EventControllerTest.php --testdox
+          php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
+          php bin/phpunit tests/Controller/EventControllerTest.php --testdox
 
       - name: 📊 Test Summary
         if: always()
@@ -113,10 +110,21 @@ jobs:
             APP_ENV: prod
         run: composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-      - name: 📦 Créer l'archive de déploiement
+      - name: 📦 Préparer l'artefact complet
         run: |
-          mkdir -p artifacts
-          tar -czf artifacts/symfony-app-${{ github.sha }}.tar.gz .
+          rm -rf build
+          mkdir build
+
+          # Copier tous les fichiers nécessaires dans build/
+          cp -r bin config public src translations vendor build/
+          cp composer.json composer.lock Dockerfile docker-entrypoint.sh build/
+
+          echo "Contenu de build/"
+          ls -R build
+
+          # Créer l'archive depuis build/
+          cd build
+          tar -czf ../artifacts/symfony-app-${{ github.sha }}.tar.gz .
 
       - name: 📤 Uploader l'artefact
         uses: actions/upload-artifact@v4
