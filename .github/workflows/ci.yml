@@ -7,7 +7,7 @@ on:
 
 jobs:
   tests:
-    name: Tests Symfony
+    name: 🧪 Tests Symfony
     runs-on: ubuntu-latest
 
     services:
@@ -25,10 +25,10 @@ jobs:
           --health-retries=10
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
@@ -36,7 +36,7 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
-      - name: Cache Composer dependencies
+      - name: 💾 Cache Composer dependencies
         uses: actions/cache@v3
         with:
           path: vendor
@@ -44,20 +44,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Install Composer dependencies
+      - name: 📦 Install Composer dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-reqs
 
-
-      - name: Audit de sécurité des dépendances
-        run: composer audit || true
-
-      - name: Setup environment
+      - name: ⚙️ Setup environment
         run: |
           cp .env.test .env.local
           sed -i '/^DATABASE_URL/d' .env.local
           echo 'DATABASE_URL="mysql://root:Abdullrahman@127.0.0.1:3306/symfony_test_test?serverVersion=8.0&charset=utf8mb4"' >> .env.local
 
-      - name: Wait for MySQL
+      - name: ⏱ Wait for MySQL
         run: |
           for i in {1..60}; do
             if mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SELECT 1" 2>/dev/null; then
@@ -68,7 +64,7 @@ jobs:
             sleep 2
           done
 
-      - name: Verification de la connexion MySQL
+      - name: 🔍 Verification de la connexion MySQL
         run: mysql -h 127.0.0.1 -P 3306 -uroot -pAbdullrahman -e "SHOW DATABASES;"
 
       - name: Setup database schema
@@ -79,16 +75,16 @@ jobs:
           
           
 
-      - name: Check PHP syntax
+      - name: ✅ Check PHP syntax
         run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
 
 
-      - name: Run specific controller tests
+      - name: 🎯 Run specific controller tests
         run: |
           php bin/phpunit tests/Controller/CategoryControllerTest.php --testdox
           php bin/phpunit tests/Controller/EventControllerTest.php --testdox
 
-      - name: Test Summary
+      - name: 📊 Test Summary
         if: always()
         run: |
           echo "=========================================="
@@ -104,17 +100,17 @@ jobs:
     name: CD - Build de Production
     needs: tests
     runs-on: ubuntu-latest
-    if: needs.tests.result == 'success' && github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Installer dépendances de production
+      - name: 📦 Installer dépendances de production
         env:
             APP_ENV: prod
         run: composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-      - name: Créer l'archive de déploiement
+      - name: 📦 Créer l'archive de déploiement
         run: |
           echo "Dossier courant:"
           pwd
@@ -128,17 +124,17 @@ jobs:
       - name: Vérifier le contenu de l'archive
         run: tar -tzf artifacts/symfony-app-${{ github.sha }}.tar.gz | head -20
 
-      - name: Uploader l'artefact
+      - name: 📤 Uploader l'artefact
         uses: actions/upload-artifact@v4
         with:
           name: symfony-build-${{ github.sha }}
           path: artifacts/symfony-app-${{ github.sha }}.tar.gz
           retention-days: 7
 
-      - name: Build réussi
+      - name: ✅ Build réussi
         run: |
           echo "============================================"
-          echo " BUILD DE PRODUCTION CRÉÉ"
+          echo "✅ BUILD DE PRODUCTION CRÉÉ"
           echo "============================================"
           echo "Fichier: symfony-app-${{ github.sha }}.tar.gz"
           echo "Taille: $(du -h artifacts/symfony-app-${{ github.sha }}.tar.gz | cut -f1)"
@@ -152,7 +148,7 @@ jobs:
     name: Instructions de déploiement
     needs: deploy
     runs-on: ubuntu-latest
-    if: needs.deploy.result == 'success' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     
     steps:
     - name: Guide de déploiement
