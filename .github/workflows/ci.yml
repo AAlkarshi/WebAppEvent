@@ -47,6 +47,10 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-reqs
 
+
+      - name: Audit de sécurité des dépendances
+        run: composer audit || true
+
       - name: Setup environment
         run: |
           cp .env.test .env.local
@@ -133,10 +137,13 @@ jobs:
 
       - name: Build réussi
         run: |
-          echo "✅ BUILD DE PRODUCTION CRÉÉ"
+          echo "============================================"
+          echo " BUILD DE PRODUCTION CRÉÉ"
+          echo "============================================"
           echo "Fichier: symfony-app-${{ github.sha }}.tar.gz"
           echo "Taille: $(du -h artifacts/symfony-app-${{ github.sha }}.tar.gz | cut -f1)"
           echo "Prêt pour déploiement manuel"
+          echo "============================================"
 
  
   # DÉPLOIEMENT MANUEL
@@ -150,7 +157,9 @@ jobs:
     steps:
     - name: Guide de déploiement
       run: |
+        echo "============================================"
         echo "VOTRE APP EST PRÊTE"
+        echo "============================================"
         echo ""
         echo "L'artefact de build a été créé avec succès !"
         echo ""
@@ -182,3 +191,4 @@ jobs:
         echo "App disponible sur http://localhost:8000"
         echo "PHPMyAdmin sur http://localhost:8082"
         echo ""
+        echo "============================================"
