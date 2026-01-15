@@ -4,17 +4,11 @@
 # Stoppe le script si erreur
 set -e
 
-#Evite les bugs aléatoire, mauvais cache et erreur DebugBundle
-export APP_ENV=prod
-export APP_DEBUG=0
-
-
-
 # Variables MySQL (adapter si nécessaire)
-DB_HOST=${DB_HOST:-database}
+DB_HOST=${DB_HOST:-DBB_webappevent}
 DB_PORT=${DB_PORT:-3306}
-DB_USER=${DB_USER:-root}
-DB_PASSWORD=${DB_PASSWORD:-Abdullrahman}
+DB_USER=${DB_USER:-user}
+DB_PASSWORD=${DB_PASSWORD:-password}
 
 # Fonction pour attendre MySQL
 function wait_for_mysql() {
