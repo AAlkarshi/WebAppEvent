@@ -19,20 +19,20 @@ class CategoryType extends AbstractType
             ->add('name_category', TextType::class, [
                 'label' => 'Nom de la catégorie',
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez saisir un nom de catégorie.'
-                    ]),
-                    new Length([
-                        'max' => 30,
-                        'maxMessage' => 'Le nom de la catégorie ne peut pas dépasser {{ limit }} caractères.',
-                    ]),
-                    new Regex([
-                        'pattern' => '/^[^\d]+$/',
-                        'message' => 'Le nom de la catégorie ne doit pas contenir de chiffres.',
-                    ]),
+                    new NotBlank(
+                        message: 'Veuillez saisir un nom de catégorie.'
+                    ),
+                    new Length(
+                        max: 30,
+                        maxMessage: 'Le nom de la catégorie ne peut pas dépasser {{ limit }} caractères.'
+                    ),
+                    new Regex(
+                        pattern: '/^[^\d]+$/',
+                        message: 'Le nom de la catégorie ne doit pas contenir de chiffres.'
+                    ),
                 ],
                 'attr' => [
-                    'maxlength' => 30, // Empêche la saisie au-delà de 30 caractères côté HTML
+                    'maxlength' => 30,
                     'placeholder' => 'Nom de la catégorie',
                 ],
             ]);

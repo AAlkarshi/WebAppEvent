@@ -72,7 +72,7 @@ use App\Entity\Category;
         $this->assertNotNull($createdCategory, 'La catégorie devrait être enregistrée dans la base de données.');
 
         // Vérifie que la catégorie est bien liée à l'admin connecté
-        $this->assertSame($user->getId(), $createdCategory->getCreatedBy());
+        $this->assertSame($user->getId(), $createdCategory->getCreated()->getId());
     }
 
 

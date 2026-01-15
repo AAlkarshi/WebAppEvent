@@ -20,6 +20,7 @@ class Category
 
     /*#[ORM\Column]
     private ?int $created_by = null; */
+    
 
     /**
      * @var Collection<int, Event>
@@ -29,7 +30,7 @@ class Category
 
     /* RELATION  Chaque catégorie est liée à un seul User */
     #[ORM\ManyToOne(inversedBy: 'categories')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'created_id', referencedColumnName: 'id', nullable: false)]
     private ?User $created = null;
 
     public function __construct()
