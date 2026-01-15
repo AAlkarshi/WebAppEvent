@@ -27,29 +27,24 @@ class Register
     #[ORM\JoinColumn(nullable: false)]
     private ?Event $Event = null;
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function isActive(): ?bool
-    {
+    public function isActive(): ?bool {
         return $this->active;
     }
 
-    public function setActive(bool $active): static
-    {
+    public function setActive(bool $active): static {
         $this->active = $active;
         return $this;
     }
 
-    public function getUser(): ?User
-    {
+    public function getUser(): ?User {
         return $this->user;
     }
 
-    public function setUser(?User $user): static
-    {
+    public function setUser(?User $user): static {
         $this->user = $user;
         return $this;
     }

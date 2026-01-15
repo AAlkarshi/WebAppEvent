@@ -19,10 +19,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[UniqueEntity(
-    fields: ['mail_user'],
-    message: 'Cet email est déjà utilisé.'
-)]
+
 
 class UserType extends AbstractType
 {
@@ -31,7 +28,7 @@ class UserType extends AbstractType
         $builder
             ->add('avatar_user', FileType::class, [
                 'label' => 'Photo de profil (PNG, JPG)',
-                'mapped' => false, // ce champ n’est pas directement lié à l’entité
+                'mapped' => false,  
                 'required' => false,
                 'constraints' => [
                     new File(
@@ -51,9 +48,45 @@ class UserType extends AbstractType
             ])
             ->add('lastname_user', TextType::class, [
                 'label' => 'Nom',
+                  'attr' => [
+                        'maxlength' => 25, 
+                    ],
+                'constraints' => [
+                    new Assert\NotBlank(
+                        message: 'Le nom est obligatoire.'
+                    ),
+                    new Assert\Length(
+                        min: 2,
+                        max: 25,
+                        minMessage: 'Le nom doit comporter au moins {{ limit }} caractères.',
+                        maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
+                    ),
+                    new Assert\Regex(
+                        pattern: '/^[a-zA-ZÀ-ÿ\s\'-]+$/u',
+                        message: 'Le nom ne peut contenir que des lettres, espaces, apostrophes et tirets.'
+                    ),
+                ],
             ])
-            ->add('firstname_user', TextType::class, [
-                'label' => 'Prénom',
+           ->add('firstname_user', TextType::class, [
+                    'label' => 'Prénom',
+                    'attr' => [
+                        'maxlength' => 25, 
+                    ],
+                    'constraints' => [
+                        new Assert\NotBlank(
+                            message: 'Le prénom est obligatoire.'
+                        ),
+                        new Assert\Length(
+                            min: 2,
+                            max: 25,
+                            minMessage: 'Le prénom doit comporter au moins {{ limit }} caractères.',
+                            maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
+                        ),
+                        new Assert\Regex(
+                            pattern: '/^[a-zA-ZÀ-ÿ\s\'-]+$/u',
+                            message: 'Le prénom ne peut contenir que des lettres, espaces, apostrophes et tirets.'
+                        ),
+                    ],
             ])
             ->add('datebirth_user', DateType::class, [
                 'widget' => 'single_text',
@@ -70,6 +103,21 @@ class UserType extends AbstractType
             ])
             ->add('mail_user', EmailType::class, [
                 'label' => 'Adresse e-mail',
+                'attr' => [
+                        'maxlength' => 40, 
+                    ],
+                'constraints' => [
+                    new Assert\NotBlank(
+                        message: 'L\'adresse e-mail est obligatoire.'
+                    ),
+                    new Assert\Email(
+                        message: 'Veuillez entrer une adresse e-mail valide.'
+                    ),
+                    new Assert\Length(
+                        max: 40,
+                        maxMessage: 'L\'adresse e-mail ne peut pas dépasser {{ limit }} caractères.'
+                    ),
+                ],
             ])
             ->add('password_user', PasswordType::class, [
                     'label' => 'Mot de passe',
@@ -86,8 +134,26 @@ class UserType extends AbstractType
                     ],
             ])
             ->add('city_user', TextType::class, [
-                'label' => 'Ville',
-            ]);
+                    'label' => 'Ville',
+                    'attr' => [
+                        'maxlength' => 35, 
+                    ],
+                    'constraints' => [
+                        new Assert\NotBlank(
+                            message: 'La ville est obligatoire.'
+                        ),
+                        new Assert\Length(
+                            min: 2,
+                            max: 35,
+                            minMessage: 'Le nom de la ville doit comporter au moins {{ limit }} caractères.',
+                            maxMessage: 'Le nom de la ville ne peut pas dépasser {{ limit }} caractères.'
+                        ),
+                        new Assert\Regex(
+                            pattern: '/^[a-zA-ZÀ-ÿ\s\'-]+$/u',
+                            message: 'La ville ne peut contenir que des lettres, espaces, apostrophes et tirets.'
+                        ),
+                    ],
+                ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

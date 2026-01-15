@@ -1,23 +1,197 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
+{% block title %}Réinitialiser le mot de passe{% endblock %}
 
-{# Page MDP Oublié #}
 {% block body %}
-    {% for flash_error in app.flashes('reset_password_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
-    <h1>Reset your password</h1>
+<section class="profile-page-container">
 
-    {{ form_start(requestForm, { method: 'POST', action: path('app_forgot_password_request')}) }}
-        {{ form_row(requestForm.mail_user) }}
-        <div>
-            <small>
-                Enter your email address, and we will send you a
-                link to reset your password.
-            </small>
+    <!-- COLONNE GAUCHE -->
+    <div class="profile-left-column">
+        <h2>Mot de passe oublié</h2>
+        <h5>Sécurité de votre compte</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-lock"></i>
+            <p>Réinitialisation</p>
         </div>
+    </div>
 
-       <button type="submit" class="btn btn-primary">Send password reset email</button>
-    {{ form_end(requestForm) }}
+    <!-- COLONNE DROITE -->
+    <div class="profile-right-column">
+        <div class="profile-card">
+
+            <h1>Réinitialiser le mot de passe</h1>
+
+            {% for flash_error in app.flashes('reset_password_error') %}
+                <div class="flash-error">{{ flash_error }}</div>
+            {% endfor %}
+
+            <p class="info-text">
+                Entrez votre adresse email afin de recevoir un lien de réinitialisation.
+            </p>
+
+            {{ form_start(requestForm, {
+                method: 'POST',
+                action: path('app_forgot_password_request')
+            }) }}
+
+            <div class="form-fields">
+                {{ form_row(requestForm.mail_user) }}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-update">
+                    Envoyer l’email
+                </button>
+            </div>
+
+            {{ form_end(requestForm) }}
+
+        </div>
+    </div>
+
+</section>
+
+<style>
+/* --- CONTENEUR GLOBAL --- */
+.profile-page-container {
+    display: flex;
+    min-height: 100vh;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- COLONNE GAUCHE --- */
+.profile-left-column {
+    background-color: #005791;
+    color: white;
+    width: 25%;
+    min-height: 100vh;
+    padding: 40px 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.profile-left-column h2 {
+    font-size: 2rem;
+}
+
+.profile-left-column h5 {
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- COLONNE DROITE --- */
+.profile-right-column {
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- CARTE --- */
+.profile-card {
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.profile-card h1 {
+    color: #005791;
+    margin-bottom: 15px;
+}
+
+/* --- TEXTE INFO --- */
+.info-text {
+    color: #555;
+    font-size: 15px;
+    margin-bottom: 20px;
+}
+
+/* --- FORMULAIRE --- */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-update {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-update:hover {
+    background-color: #0056b3;
+}
+
+/* --- FLASH ERROR --- */
+.flash-error {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .profile-page-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-right-column {
+        width: 100%;
+    }
+
+    .profile-left-column {
+        display: none;
+    }
+}
+
+/* Colonne gauche disparaît */
+@media (max-width: 425px) {
+    .profile-left-column {
+        display: none;
+    }
+
+    body > footer > div > div:nth-child(2),
+    body > footer > div > div:nth-child(3) {
+        display: none;
+    }
+}
+
+/* Très petit écran */
+@media (max-width: 320px) {
+    body > footer > div > div:nth-child(1) > p {
+        display: none;
+    }
+}
+</style>
 {% endblock %}

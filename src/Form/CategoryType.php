@@ -8,6 +8,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class CategoryType extends AbstractType
 {
@@ -17,7 +19,21 @@ class CategoryType extends AbstractType
             ->add('name_category', TextType::class, [
                 'label' => 'Nom de la catégorie',
                 'constraints' => [
-                    new NotBlank(message: 'Veuillez saisir un nom de catégorie.'),
+                    new NotBlank([
+                        'message' => 'Veuillez saisir un nom de catégorie.'
+                    ]),
+                    new Length([
+                        'max' => 30,
+                        'maxMessage' => 'Le nom de la catégorie ne peut pas dépasser {{ limit }} caractères.',
+                    ]),
+                    new Regex([
+                        'pattern' => '/^[^\d]+$/',
+                        'message' => 'Le nom de la catégorie ne doit pas contenir de chiffres.',
+                    ]),
+                ],
+                'attr' => [
+                    'maxlength' => 30, // Empêche la saisie au-delà de 30 caractères côté HTML
+                    'placeholder' => 'Nom de la catégorie',
                 ],
             ]);
     }

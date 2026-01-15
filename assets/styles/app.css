@@ -95,7 +95,7 @@ input[type="range"] {
 
 .event-image {
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
 }
 
@@ -203,7 +203,7 @@ footer {
   display: flex;
   justify-content: center; /* espace entre les colonnes */
   align-items: flex-start; /* alignement vertical des colonnes */
-  gap: 10rem; /* plus grand écart entre les colonnes */
+  gap: 10px; /* plus grand écart entre les colonnes */
   flex-wrap: wrap; /* pour rester responsive */
 }
 

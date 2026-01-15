@@ -3,35 +3,173 @@
 {% block title %}Liste des utilisateurs{% endblock %}
 
 {% block body %}
-<h1>Liste des utilisateurs</h1>
+<section class="users-container">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Email</th>
-            <th>Rôle</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.lastnameUser }}</td>
-                <td>{{ user.firstnameUser }}</td>
-                <td>{{ user.mailUser }}</td>
-                <td>{{ user.roles|join(', ') }}</td>
-                <td>
-                    <a href="{{ path('deleteUser', {'id': user.id}) }}" class="btn btn-sm btn-danger"
-                       onclick="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">Supprimer</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">Aucun utilisateur trouvé.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <h1>Liste des utilisateurs</h1>
+
+    <div class="table-wrapper">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.lastnameUser }}</td>
+                        <td>{{ user.firstnameUser }}</td>
+                        <td>{{ user.mailUser }}</td>
+                        <td>
+                            {% if 'ROLE_ADMIN' in user.roles %}
+                                <span class="role-badge admin">ADMIN</span>
+                            {% else %}
+                                <span class="role-badge user">USER</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('deleteUser', {'id': user.id}) }}"
+                               class="btn-delete"
+                               onclick="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">
+                                Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-row">
+                            Aucun utilisateur trouvé.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# --- PAGINATION --- #}
+    {% if totalPages > 1 %}
+        <div class="pagination">
+
+            {% if currentPage > 1 %}
+                <a href="{{ path('listUsers', { page: currentPage - 1 }) }}">&laquo;</a>
+            {% endif %}
+
+            {% for page in 1..totalPages %}
+                <a href="{{ path('listUsers', { page: page }) }}"
+                class="{{ page == currentPage ? 'active' : '' }}">
+                    {{ page }}
+                </a>
+            {% endfor %}
+
+            {% if currentPage < totalPages %}
+                <a href="{{ path('listUsers', { page: currentPage + 1 }) }}">&raquo;</a>
+            {% endif %}
+
+        </div>
+    {% endif %}
+
+
+</section>
+
+<style>
+/* --- CONTENEUR --- */
+.users-container {
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+.users-container h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #005791;
+}
+
+/* --- TABLE --- */
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.users-table thead {
+    background: #005791;
+    color: #fff;
+}
+
+.users-table th,
+.users-table td {
+    padding: 15px;
+    text-align: center;
+}
+
+.users-table tbody tr:hover {
+    background-color: #f5f9fc;
+}
+
+/* --- BADGES ROLES --- */
+.role-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.role-badge.admin {
+    background: #e74c3c;
+    color: white;
+}
+
+.role-badge.user {
+    background: #3498db;
+    color: white;
+}
+
+/* --- BOUTON SUPPRIMER --- */
+.btn-delete {
+    padding: 8px 14px;
+    background: #c0392b;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.btn-delete:hover {
+    background: #a93226;
+}
+
+/* --- PAGINATION --- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 8px;
+}
+
+.pagination a {
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #e6f0f8;
+    color: #005791;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.pagination a.active {
+    background: #005791;
+    color: white;
+}
+
+.pagination a:hover {
+    background: #005791;
+    color: white;
+}
+</style>
 {% endblock %}

@@ -1,12 +1,220 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
+{% block title %}Réinitialiser le mot de passe{% endblock %}
 
 {% block body %}
-    <h1>Reset your password</h1>
+<section class="profile-page-container">
 
-    {{ form_start(resetForm) }}
-        {{ form_row(resetForm.plainPassword) }}
-        <button class="btn btn-primary">Reset password</button>
-    {{ form_end(resetForm) }}
+    <!-- COLONNE GAUCHE -->
+    <div class="profile-left-column">
+        <h2>Nouveau mot de passe</h2>
+        <h5>Sécurisation du compte</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-key"></i>
+            <p>Réinitialisation</p>
+        </div>
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div class="profile-right-column">
+        <div class="profile-card">
+
+            <h1>Choisissez un nouveau mot de passe</h1>
+
+            {{ form_start(resetForm) }}
+
+           <div class="form-fields password-wrapper">
+    {{ form_row(resetForm.plainPassword) }}
+
+    <button type="button" class="btn-show-password">
+        Voir
+    </button>
+</div>
+
+
+
+                <div class="form-actions">
+                    <button class="btn-update">
+                        Réinitialiser le mot de passe
+                    </button>
+                </div>
+
+            {{ form_end(resetForm) }}
+
+        </div>
+    </div>
+
+</section>
+
+<style>
+/* --- CONTENEUR GLOBAL --- */
+.profile-page-container {
+    display: flex;
+    min-height: 100vh;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- COLONNE GAUCHE --- */
+.profile-left-column {
+    background-color: #005791;
+    color: white;
+    width: 25%;
+    min-height: 100vh;
+    padding: 40px 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.btn-show-password {
+    background-color: #005791;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    width: fit-content;
+    align-self: center;
+}
+
+.btn-show-password:hover {
+    background-color: #003f66;
+}
+
+.profile-left-column h2 {
+    font-size: 2rem;
+}
+
+.profile-left-column h5 {
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- COLONNE DROITE --- */
+.profile-right-column {
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- CARTE --- */
+.profile-card {
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.profile-card h1 {
+    color: #005791;
+    margin-bottom: 20px;
+}
+
+/* --- FORMULAIRE --- */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-update {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-update:hover {
+    background-color: #0056b3;
+}
+
+/* --- RESPONSIVE tablete --- */
+@media (max-width: 768px) {
+    .profile-page-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-right-column {
+        width: 100%;
+    }
+
+    .profile-left-column {
+        display: none;
+    }
+}
+
+/* Colonne gauche disparait */
+@media (max-width: 425px) {
+    .profile-left-column {
+        display: none;
+    }
+
+    body > footer > div > div:nth-child(2),
+    body > footer > div > div:nth-child(3) {
+        display: none;
+    }
+}
+
+/*  Taille S */
+@media (max-width: 320px) {
+    body > footer > div > div:nth-child(1) > p {
+        display: none;
+    }
+}
+</style>
+
+
+<script>
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-show-password');
+    if (!btn) return;
+
+    const wrapper = btn.closest('.password-wrapper');
+    if (!wrapper) return;
+
+    const inputs = wrapper.querySelectorAll('input');
+
+    let show = false;
+
+    inputs.forEach(input => {
+        if (input.type === 'password') {
+            show = true;
+        }
+    });
+
+    inputs.forEach(input => {
+        input.type = show ? 'text' : 'password';
+    });
+
+    btn.textContent = show ? 'Cacher' : 'Voir';
+});
+</script>
+
+
 {% endblock %}

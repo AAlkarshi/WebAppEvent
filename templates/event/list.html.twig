@@ -187,9 +187,11 @@ Accueil
 
 
 
-<div class="pagination">
-    {{ knp_pagination_render(events) }}
-</div>
+{% if events.getTotalItemCount > 8 %}
+    <div class="pagination">
+        {{ knp_pagination_render(events) }}
+    </div>
+{% endif %}
 
 
 
@@ -270,6 +272,25 @@ Accueil
         border-radius: 5px;
         padding: 10px 15px;
     }
+
+    .footer{
+        width:100%;
+        display:flex;
+        flex-direction:row;
+    }
+
+    .footer-columns{
+        display:flex;
+        flex-direction:row;
+        justify-content:space-around;
+        
+        gap:10px;
+        flex-wrap: no-wrap;
+    }
+
+        
+
+    
 
     /* --- Colonne droite (Grille des événements) --- */
     /* --- Grille d'événements --- */
@@ -458,12 +479,27 @@ Accueil
     .events-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    
+
 }
+
+
+ 
+
+
 
 @media (max-width: 800px) {
     .events-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .footer-columns{
+        flex-direction:column;
+        align-items:center;
+    }
+
+     
 }
 
 @media (max-width: 500px) {
@@ -492,8 +528,9 @@ Accueil
                 .footer-columns {
                     flex-direction: column;
                     align-items: center;
-                    gap: 2rem;
                 }
+
+                
 
                 .pagination{
                     text-align:center;
@@ -511,6 +548,22 @@ Accueil
                     display:flex;
                     flex-direction: column;
                 }
+
+                /*Sous TABLETTE pas de footer Information ou Contactez-nous */
+                body > footer > div > div:nth-child(2){
+                    display:none;
+                } 
+
+                /* Ville de localisation Caché */
+                body > footer > div > div:nth-child(3) > p:nth-child(3){
+                    display:none;
+                }
+                 
+
+                
+                
+                
+
             
 }
 

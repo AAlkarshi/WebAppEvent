@@ -1,13 +1,182 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Password Reset Email Sent{% endblock %}
-
-{# Page de Confirmation d'Envoi #}
+{% block title %}Email envoyé{% endblock %}
 
 {% block body %}
-    <p>
-        If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
-        This link will expire in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
-    </p>
-    <p>If you don't receive an email please check your spam folder or <a href="{{ path('app_forgot_password_request') }}">try again</a>.</p>
+<section class="profile-page-container">
+
+    <!-- COLONNE GAUCHE -->
+    <div class="profile-left-column">
+        <h2>Email envoyé</h2>
+        <h5>Réinitialisation du mot de passe</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-envelope-circle-check"></i>
+            <p>Vérification</p>
+        </div>
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div class="profile-right-column">
+        <div class="profile-card">
+
+            <h1>Vérifiez votre boîte mail</h1>
+
+            <p class="info-text">
+                Si un compte correspondant à votre adresse email existe,
+                un message vient de vous être envoyé avec un lien de réinitialisation.
+            </p>
+
+            <p class="info-text">
+                Ce lien expirera dans
+                <strong>
+                    {{ resetToken.expirationMessageKey|trans(
+                        resetToken.expirationMessageData,
+                        'ResetPasswordBundle'
+                    ) }}
+                </strong>.
+            </p>
+
+            <p class="info-text">
+                Pensez à vérifier votre dossier <strong>spam</strong>.
+            </p>
+
+            <div class="form-actions">
+                <a href="{{ path('app_forgot_password_request') }}" class="btn-update">
+                    Renvoyer l’email
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</section>
+
+<style>
+/* --- CONTENEUR GLOBAL --- */
+.profile-page-container {
+    display: flex;
+    min-height: 100vh;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- COLONNE GAUCHE --- */
+.profile-left-column {
+    background-color: #005791;
+    color: white;
+    width: 25%;
+    min-height: 100vh;
+    padding: 40px 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.profile-left-column h2 {
+    font-size: 2rem;
+}
+
+.profile-left-column h5 {
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- COLONNE DROITE --- */
+.profile-right-column {
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- CARTE --- */
+.profile-card {
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.profile-card h1 {
+    color: #005791;
+    margin-bottom: 15px;
+}
+
+/* --- TEXTE INFO --- */
+.info-text {
+    color: #555;
+    font-size: 15px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+/* --- BOUTON --- */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-update {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-update:hover {
+    background-color: #0056b3;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .profile-page-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-right-column {
+        width: 100%;
+    }
+
+    .profile-left-column {
+        display: none;
+    }
+}
+
+/* Colonne gauche disparaît */
+@media (max-width: 425px) {
+    .profile-left-column {
+        display: none;
+    }
+
+    body > footer > div > div:nth-child(2),
+    body > footer > div > div:nth-child(3) {
+        display: none;
+    }
+}
+
+/* Très petit écran */
+@media (max-width: 320px) {
+    body > footer > div > div:nth-child(1) > p {
+        display: none;
+    }
+}
+</style>
 {% endblock %}

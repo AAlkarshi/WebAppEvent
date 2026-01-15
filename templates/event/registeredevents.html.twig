@@ -3,18 +3,56 @@
 {% block title %}Mes événements inscrits{% endblock %}
 
 {% block body %}
-<section class="events-container">
-    <h2>Mes événements inscrits</h2>
-
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }}">{{ message }}</div>
-        {% endfor %}
-    {% endfor %}
+<section class="events-page-container">
 
     {% if registrations.items is empty %}
-        <p>Vous n’êtes inscrit à aucun événement pour le moment.</p>
+    <!-- EMPTY STATE (comme MyProfile) -->
+    <section class="profile-page-container">
+
+        <!-- COLONNE GAUCHE -->
+        <div class="profile-left-column">
+            <h2>Mes événements</h2>
+            <h5>Inscriptions</h5>
+            <div class="contact-info">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                <p>Aucun événement</p>
+            </div>
+        </div>
+
+        <!-- COLONNE DROITE -->
+        <div class="profile-right-column">
+            <div class="profile-card">
+                <h1>Aucune inscription</h1>
+
+                <p>
+                    Vous n’êtes inscrit à aucun événement pour le moment.
+                </p>
+
+                <p>
+                    Découvrez les événements disponibles et inscrivez-vous 👇
+                </p>
+
+                <div class="form-actions">
+                    <a href="{{ path('app_events') }}" class="btn-update">
+                        Voir les événements
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
     {% else %}
+    <!-- GRID DES ÉVÉNEMENTS -->
+    <section class="events-container">
+        <h2>Mes événements inscrits</h2>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
         <p>{{ registrations.totalItemCount }} événement{{ registrations.totalItemCount > 1 ? 's' : '' }} trouvé{{ registrations.totalItemCount > 1 ? 's' : '' }}.</p>
 
         <div class="events-grid">
@@ -52,12 +90,12 @@
                             {{ reg.event.nbxParticipantMax is not empty ? reg.event.nbxParticipantMax : 'Illimité' }}
                         </p>
 
-                       <div class="event-actions">
+                        <div class="event-actions">
                             {% if reg.event.createdBy == app.user %}
                                 <a href="{{ path('view_myevent', {id: reg.event.id}) }}" class="btn-submit">Voir</a>
                             {% endif %}
                             <a href="{{ path('event_unregister', {id: reg.event.id}) }}" class="btn-submit btn-danger"
-                            onclick="return confirm('Voulez-vous vraiment vous désinscrire de cet événement ?');">
+                               onclick="return confirm('Voulez-vous vraiment vous désinscrire de cet événement ?');">
                                 Se désinscrire
                             </a>
                         </div>
@@ -67,13 +105,18 @@
             {% endfor %}
         </div>
 
-        <div class="pagination">
-            {{ knp_pagination_render(registrations) }}
-        </div>
+        {% if registrations.getTotalItemCount > 3 %}
+            <div class="pagination">
+                {{ knp_pagination_render(registrations) }}
+            </div>
+        {% endif %}
+    </section>
     {% endif %}
+
 </section>
 
 <style>
+ 
 .events-container {
     padding: 20px;
     font-family: Quicksand;
@@ -83,18 +126,16 @@
 .events-container h2 {
     text-align: center;
     margin-bottom: 20px;
-    font-family: Quicksand;
-    font-weight: bold;
 }
 
-/* --- GRILLE D'ÉVÉNEMENTS --- */
+/* Grille responsive */
 .events-grid {
     display: flex;
     flex-direction: column;
     gap: 30px;
 }
 
-/* --- CARTE ÉVÉNEMENT --- */
+/* Carte */
 .event-card {
     display: flex;
     background-color: #f8f8f8;
@@ -107,6 +148,7 @@
     width: 250px;
     flex-shrink: 0;
     overflow: hidden;
+    
 }
 
 .event-image-wrapper img {
@@ -120,8 +162,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    font-family: Quicksand;
-    font-weight: bold;
 }
 
 .event-info h3 {
@@ -156,13 +196,10 @@
     background-color: #c0392b;
 }
 
-
-
 .pagination {
     display: flex;
     align-items: center;
     justify-content: center;
-    align-content: center;
     height: 40px;
     width: 100%;
     border-radius: 8px;
@@ -171,14 +208,92 @@
     color: black;
     border: 1px solid #005791;
     gap: 5px;
-    margin-top: auto;
-   
+    margin-top: 20px;
+}
+
+ 
+.profile-page-container {
+    display: flex;
+    min-height: 60vh;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.profile-left-column {
+    background-color: #005791;
+    color: white;
+    width: 25%;
+    min-height: 200px;
+    padding: 40px 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.profile-left-column h2 {
+    font-size: 2rem;
+}
+
+.profile-left-column h5 {
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-right-column {
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-card {
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.profile-card h1 {
+    color: #005791;
+    margin-bottom: 20px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-update {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-update:hover {
+    background-color: #0056b3;
 }
 
 
+/* RESPONSIVE tablete */
 
-
-/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .event-card {
         flex-direction: column;
@@ -187,6 +302,18 @@
     .event-image-wrapper {
         width: 100%;
         height: 200px;
+    }
+
+    .profile-page-container {
+        flex-direction: column;
+    }
+
+    .profile-left-column {
+        display: none;
+    }
+
+    .profile-right-column {
+        width: 100%;
     }
 }
 </style>

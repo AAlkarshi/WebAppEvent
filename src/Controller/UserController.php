@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -25,6 +26,7 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Repository\UserRepository;
 
 
 class UserController extends AbstractController
@@ -282,26 +284,33 @@ public function deleteAccount(Request $request, EntityManagerInterface $em, Toke
 
 
 //Listes des USERS pour ADMIN UNIQUEMENT
-#[Route('/listUsers', name: 'listUsers', methods: ['POST','GET'])]
+#[Route('/listUsers/{page}', name: 'listUsers', requirements: ['page' => '\d+'], methods: ['POST','GET'] , defaults: ['page' => 1])]
 #[IsGranted('ROLE_ADMIN')]
-    public function listUsers(EntityManagerInterface $em): Response {
-        
-        // Récup de tout les users
-        $users = $em->getRepository(User::class)->findAll();
+    public function listUsers(UserRepository $repo, int $page, EntityManagerInterface $em): Response {
+
+        $limit = 12;
+        $offset = ($page - 1) * $limit;
+
+        $users = $repo->findBy([], ['id' => 'DESC'], $limit, $offset );
+        $totalUsers = $repo->count([]);
+        $totalPages = ceil($totalUsers / $limit);
 
         return $this->render('default/listUsers.html.twig', [
             'users' => $users,
+
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
 //Pouvoir SUPPRIMER un USER DANS LA LISTE en tant qu'ADMIN uniquement
  #[Route('/users/{id}/delete', name: 'deleteUser')]
 #[IsGranted('ROLE_ADMIN')]
-    public function deleteUser(User $user, Event $event, EntityManagerInterface $em): Response {
+    public function deleteUser(User $user, /*Event $event,*/ EntityManagerInterface $em): Response {
         
         // On ne peut pas supprimer soi-même (optionnel)
         if ($user === $this->getUser()) {
-            $this->addFlash('error', '❌ Vous ne pouvez pas supprimer votre propre compte.');
+            $this->addFlash('error', 'Vous pouvez pas supprimer votre propre compte.');
             return $this->redirectToRoute('listUsers');
         }
 

@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+use App\Repository\CategoryRepository;
+
 class CategoryController extends AbstractController
 {
     #[Route('/category/create', name: 'createCategory')]
@@ -18,9 +20,7 @@ class CategoryController extends AbstractController
     public function create(Request $request, EntityManagerInterface $em): Response {
         $category = new Category();
 
-        // On peut pré-remplir l'utilisateur créateur
         $category->setCreated($this->getUser());
-        $category->setCreatedBy($this->getUser()->getId());
 
         $form = $this->createForm(CategoryType::class, $category);
 
@@ -41,13 +41,19 @@ class CategoryController extends AbstractController
     }
 
 
-    #[Route('/category/list', name: 'listCategories')]
-    #[IsGranted('ROLE_ADMIN')] // Seul l'admin peut accéder
-    public function list(EntityManagerInterface $em): Response {
-        $categories = $em->getRepository(Category::class)->findAll();
+    #[Route('/category/list/{page}', name: 'listCategories', requirements: ['page' => '\d+'], defaults: ['page' => 1])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function list(CategoryRepository $repo, int $page ): Response {
+        $limit = 7;
+        $offset = ($page - 1) * $limit;
+        $categories = $repo->findBy( [], ['id' => 'DESC'], $limit, $offset );
+        $totalCategories = $repo->count([]);
+        $totalPages = ceil($totalCategories / $limit);
 
         return $this->render('category/listcategory.html.twig', [
             'categories' => $categories,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 

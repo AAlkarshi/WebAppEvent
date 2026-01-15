@@ -213,12 +213,60 @@
 @media (max-width: 768px) {
     .profile-page-container {
         flex-direction: column;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .profile-left-column,
+    
     .profile-right-column {
         width: 100%;
+        align-items: center;
+        height: 100%;
+        display: flex;
+        text-align: center;
+        justify-content: center;
+    }
+
+     .profile-left-column {
+        display: none;
+    }
+    .profile-card {
+        align-items: center;
+    }
+
+    
+}
+
+/* Colonne gauche bleu disparait */
+@media (max-width: 425px) {
+    .profile-page-container {
+        flex-direction: column;
+    }
+    .profile-left-column {
+        display: none;
+    }
+    /*BLOC INFO FOOTER DISPARAIT */
+    body > footer > div > div:nth-child(2) { 
+        display: none;   
+    } 
+    /*BLOC CONTACTER NOUS FOOTER DISPARAIT */
+    body > footer > div > div:nth-child(3) { 
+        display: none;   
+    } 
+}
+
+
+
+/* Enlevé sous taille S soit 320px */
+@media (max-width: 320px) {
+    body > footer > div > div:nth-child(1) > p {
+        display: none;
     }
 }
+
+
+
 </style>
 
 <script>

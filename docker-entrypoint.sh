@@ -32,18 +32,18 @@ wait_for_mysql
 
 
 
-echo "🗄 Création base si absente"
+echo "Création base si absente"
 php bin/console doctrine:database:create --if-not-exists --env=prod
 
-echo "📐 Mise à jour schéma"
+echo "Mise à jour schéma"
 #php bin/console doctrine:migrations:migrate --no-interaction
 php bin/console doctrine:schema:update --force --env=prod
 
-echo "📦 Chargement des fixtures"
+echo "Chargement des fixtures"
 #php bin/console doctrine:fixtures:load --no-interaction
 php bin/console doctrine:fixtures:load --no-interaction --env=prod || true
 
-echo "🔥 Cache prod"
+echo "Cache prod"
 php bin/console cache:clear --env=prod
 
 # Lancer Apache en foreground

@@ -60,7 +60,7 @@ class Event
 
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: "created_by", referencedColumnName: "id", nullable: false)]
     private ?User $createdBy = null;
 
 
@@ -82,102 +82,85 @@ class Event
 
     }
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getTitleEvent(): ?string
-    {
+    public function getTitleEvent(): ?string {
         return $this->title_event;
     }
 
-    public function setTitleEvent(string $title_event): static
-    {
+    public function setTitleEvent(string $title_event): static {
         $this->title_event = $title_event;
 
         return $this;
     }
 
-    public function getCategory(): ?Category
-    {
+    public function getCategory(): ?Category{
         return $this->category;
     }
 
-    public function setCategory(?Category $category): static
-    {
+    public function setCategory(?Category $category): static {
         $this->category = $category;
 
         return $this;
     }
 
-    public function getImageEvent(): ?string
-    {
+    public function getImageEvent(): ?string {
         return $this->image_event;
     }
 
-    public function setImageEvent(?string $image_event): static
-    {
+    public function setImageEvent(?string $image_event): static {
         $this->image_event = $image_event;
 
         return $this;
     }
 
-    public function getDescriptionEvent(): ?string
-    {
+    public function getDescriptionEvent(): ?string {
         return $this->description_event;
     }
 
-    public function setDescriptionEvent(?string $description_event): static
-    {
+    public function setDescriptionEvent(?string $description_event): static {
         $this->description_event = $description_event;
 
         return $this;
     }
 
-    public function getDateTimeEvent(): ?\DateTime
-    {
+    public function getDateTimeEvent(): ?\DateTime {
         return $this->dateTime_event;
     }
 
-    public function setDateTimeEvent(\DateTime $dateTime_event): static
-    {
+    public function setDateTimeEvent(\DateTime $dateTime_event): static {
         $this->dateTime_event = $dateTime_event;
 
         return $this;
     }
 
-    public function getDurationEvent(): ?int
-    {
+    public function getDurationEvent(): ?int {
         return $this->duration_event;
     }
 
-    public function setDurationEvent(?int $duration_event): static
-    {
+    public function setDurationEvent(?int $duration_event): static{
         $this->duration_event = $duration_event;
 
         return $this;
     }
 
-    public function getNbxParticipant(): ?int
-    {
+    public function getNbxParticipant(): ?int{
         return $this->nbx_participant;
     }
 
-    public function setNbxParticipant(int $nbx_participant): static
-    {
+    public function setNbxParticipant(int $nbx_participant): static{
         $this->nbx_participant = $nbx_participant;
 
         return $this;
     }
 
-    public function getNbxParticipantMax(): ?int
-    {
+    public function getNbxParticipantMax(): ?int{
         return $this->nbx_participant_max;
     }
 
-    public function setNbxParticipantMax(int $nbx_participant_max): static
-    {
+    public function setNbxParticipantMax(int $nbx_participant_max): static{
         $this->nbx_participant_max = $nbx_participant_max;
 
         return $this;
@@ -189,7 +172,7 @@ class Event
 
 
     public function getCreatedBy(): ?User
-    {
+{
         return $this->createdBy;
     }
 
@@ -235,13 +218,11 @@ class Event
         return $this;
     }
 
-    public function getAddress(): ?Address
-    {
+    public function getAddress(): ?Address {
         return $this->address;
     }
 
-    public function setAddress(?Address $address): static
-    {
+    public function setAddress(?Address $address): static{
         $this->address = $address;
 
         return $this;

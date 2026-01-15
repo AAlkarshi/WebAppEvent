@@ -3,54 +3,229 @@
 {% block title %}Créer une catégorie{% endblock %}
 
 {% block body %}
-<section class="category-container">
-    <h1>Créer une catégorie</h1>
+<section class="event-container">
+    <!-- COLONNE GAUCHE -->
+    <div class="ColonneGauche">
+        <h2>Créer une nouvelle catégorie</h2>
+        <h5>Remplissez le formulaire pour ajouter votre catégorie</h5>
+        <div class="contact-info">
+            <i class="fa-solid fa-envelope"></i>
+            <p>alkarshi.abdullrahman@gmail.com</p>
+        </div>
+    </div>
 
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="flash-{{ label }}">{{ message }}</div>
-        {% endfor %}
-    {% endfor %}
+    <!-- COLONNE DROITE -->
+    <div class="event-grid">
+        <div class="profile-container">
+            <h1>Nouvelle catégorie</h1>
 
-    {{ form_start(form) }}
-        {{ form_row(form.name_category) }}
-        <button class="btn-submit">Créer</button>
-    {{ form_end(form) }}
+            {% for message in app.flashes('success') %}
+                <div class="flash-success">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="flash-error">{{ message }}</div>
+            {% endfor %}
+
+           {{ form_start(form, {
+                'attr': {
+                    'novalidate': 'novalidate', 
+                    'style': 'display:flex;flex-direction:column;gap:15px;width:100%;',
+                    'data-turbo': 'false'
+                }
+            }) }}
+
+            {{ form_errors(form) }}
+
+            <div class="form-group">
+                {{ form_label(form.name_category) }}
+                {{ form_widget(form.name_category, {
+                    'attr': {
+                        'placeholder': 'Nom de la catégorie',
+                        'maxlength': 30,
+                        'pattern': '[^\d]+',
+                        'title': 'Le nom ne doit pas contenir de chiffres.'
+                    }
+                }) }}
+                {{ form_errors(form.name_category) }}
+            </div>
+
+            <div class="form-actions" style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                <button type="submit" class="btn-submit">Créer</button>
+            </div>
+
+            {{ form_end(form) }}
+
+        </div>
+    </div>
 </section>
 
 <style>
-.category-container {
-    width: 400px;
-    margin: 50px auto;
-    background-color: #f9f9f9;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    text-align: center;
+/* --- CONTENEUR GLOBAL --- */
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
+/* --- COLONNE GAUCHE --- */
+.ColonneGauche {
+    background-color: #005791;
+    width: 40%;
+    padding: 50px 30px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.ColonneGauche h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.ColonneGauche h5 {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+/* --- COLONNE DROITE --- */
+.event-grid {
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- FORMULAIRE --- */
+.profile-container {
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+.profile-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* --- GROUPES DE CHAMPS --- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-container form label {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.profile-container form input,
+.profile-container form select,
+.profile-container form textarea {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* --- BOUTON --- */
 .btn-submit {
     background-color: #005791;
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 25px;
+    font-size: 1.1rem;
     border: none;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 10px;
+    transition: background-color 0.3s;
 }
 
 .btn-submit:hover {
-    background-color: #003f6e;
+    background-color: #00406a;
 }
 
+/* --- FLASH MESSAGES --- */
 .flash-success {
     color: green;
-    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
 }
 
 .flash-error {
     color: red;
-    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* --- ERREURS DE FORMULAIRE SYMFONY --- */
+.invalid-feedback,
+.form-error-message,
+ul.form-error-list {
+    display: block;
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border-left: 4px solid #d32f2f;
+    margin-top: 5px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    list-style: none;
+}
+
+ul.form-error-list {
+    padding-left: 15px;
+}
+
+ul.form-error-list li {
+    margin: 5px 0;
+}
+
+.form-control.is-invalid,
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
+    border-color: #d32f2f;
+    background-color: #fff5f5;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .event-container {
+        flex-direction: column;
+        height: auto;
+        justify-content: center;
+    }
+    .ColonneGauche, .event-grid {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .profile-container h1 {
+        font-size: 1.8rem;
+    }
+    .ColonneGauche h2 {
+        font-size: 1.8rem;
+    }
 }
 </style>
 {% endblock %}

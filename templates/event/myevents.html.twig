@@ -150,7 +150,7 @@
 
 .event-image-wrapper img {
     width: 150px;
-    height: 150px;
+    height: 100%;
     object-fit: cover;
 }
 
@@ -229,7 +229,20 @@
     font-size: 1rem;
 }
 
-/* --- RESPONSIVE --- */
+
+.footer {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+
+.footer-columns{
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+}
+
+/* --- RESPONSIVE TABLETTE --- */
 @media (max-width: 768px) {
     .event-container {
         flex-direction: column;
@@ -244,5 +257,25 @@
         max-width: 100%;
     }
 }
+
+
+
+@media (max-width: 900px) {
+     .ColonneGauche {
+       display: none;
+    }
+
+    .event-container{
+        justify-content: center;
+    }
+}
+
+
+
+
+
+
+
+
 </style>
 {% endblock %}

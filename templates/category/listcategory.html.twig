@@ -3,50 +3,152 @@
 {% block title %}Liste des catégories{% endblock %}
 
 {% block body %}
-<h1>Liste des catégories</h1>
+<section class="users-container">
 
-{% for message in app.flashes('success') %}
-    <div class="alert alert-success">
-        {{ message }}
-    </div>
-{% endfor %}
+    <h1>Liste des catégories</h1>
 
-{% for message in app.flashes('error') %}
-    <div class="alert alert-danger">
-        {{ message }}
-    </div>
-{% endfor %}
+    {# FLASH MESSAGES #}
+    {% for message in app.flashes('success') %}
+        <div class="flash-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="flash-error">{{ message }}</div>
+    {% endfor %}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nom de la catégorie</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if categories is not empty %}
-            {% for category in categories %}
+    <div class="table-wrapper">
+        <table class="users-table">
+            <thead>
                 <tr>
-                    <td>{{ category.id }}</td>
-                    <td>{{ category.nameCategory }}</td>
-                    <td>
-                        <a href="{{ path('editCategory', {'id': category.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
-                        <a href="{{ path('deleteCategory', {'id': category.id}) }}" class="btn btn-sm btn-danger" 
-                           onclick="return confirm('Voulez-vous vraiment supprimer cette catégorie ?');">
-                           Supprimer
-                        </a>
-                    </td>
+                    <th>Nom de la catégorie</th>
+                    <th>Actions</th>
                 </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="3">Aucune catégorie disponible.</td>
-            </tr>
-        {% endif %}
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        
+                        <td>{{ category.nameCategory }}</td>
+                        <td>
+                            <a href="{{ path('editCategory', { id: category.id }) }}"
+                               class="btn-delete"
+                               style="background:#3498db;margin-right:6px;">
+                                Modifier
+                            </a>
 
-<a href="{{ path('createCategory') }}" class="btn btn-success">Ajouter une catégorie</a>
+                            <a href="{{ path('deleteCategory', { id: category.id }) }}"
+                               class="btn-delete"
+                               onclick="return confirm('Voulez-vous vraiment supprimer cette catégorie ?');">
+                                Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="empty-row">
+                            Aucune catégorie trouvée.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# PAGINATION #}
+    {% if totalPages > 1 %}
+        <div class="pagination">
+            {% if currentPage > 1 %}
+                <a href="{{ path('listCategories', { page: currentPage - 1 }) }}">&laquo;</a>
+            {% endif %}
+
+            {% for page in 1..totalPages %}
+                <a href="{{ path('listCategories', { page: page }) }}"
+                   class="{{ page == currentPage ? 'active' : '' }}">
+                    {{ page }}
+                </a>
+            {% endfor %}
+
+            {% if currentPage < totalPages %}
+                <a href="{{ path('listCategories', { page: currentPage + 1 }) }}">&raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+</section>
+
+{# ===== CSS IDENTIQUE À listUsers ===== #}
+<style>
+.users-container {
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+.users-container h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #005791;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.users-table thead {
+    background: #005791;
+    color: #fff;
+}
+
+.users-table th,
+.users-table td {
+    padding: 15px;
+    text-align: center;
+}
+
+.users-table tbody tr:hover {
+    background-color: #f5f9fc;
+}
+
+.btn-delete {
+    padding: 8px 14px;
+    background: #c0392b;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.btn-delete:hover {
+    background: #a93226;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 8px;
+}
+
+.pagination a {
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #e6f0f8;
+    color: #005791;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.pagination a.active {
+    background: #005791;
+    color: white;
+}
+
+.pagination a:hover {
+    background: #005791;
+    color: white;
+}
+</style>
 {% endblock %}

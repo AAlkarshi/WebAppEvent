@@ -18,8 +18,8 @@ class Category
     #[ORM\Column(length: 50)]
     private ?string $name_category = null;
 
-    #[ORM\Column]
-    private ?int $created_by = null;
+    /*#[ORM\Column]
+    private ?int $created_by = null; */
 
     /**
      * @var Collection<int, Event>
@@ -54,7 +54,7 @@ class Category
         return $this;
     }
 
-    public function getCreatedBy(): ?int
+   /* public function getCreatedBy(): ?int
     {
         return $this->created_by;
     }
@@ -65,6 +65,7 @@ class Category
 
         return $this;
     }
+*/
 
     /**
      * @return Collection<int, Event>

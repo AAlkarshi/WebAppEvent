@@ -1,38 +1,350 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}
-    Inscription
-{% endblock %}
+{% block title %}Inscription Admin{% endblock %}
 
 {% block body %}
 <section class="event-container">
-    <!-- 🧭 COLONNE GAUCHE -->
+    <!-- COLONNE GAUCHE -->
     <div class="ColonneGauche">
-        <h2 style="color:white;">S'inscrire</h2>
-        <h5 style="color:grey;">Rejoignez notre communauté</h5>
-        <div style="color:white; display:flex; align-items:center; gap:10px;">
+        <h2>S'inscrire</h2>
+        <h5>Rejoignez notre communauté</h5>
+        <div class="contact-info">
             <i class="fa-solid fa-envelope"></i>
-            <p style="margin:0;">OrgaEvent@gmail.com</p>
+            <p>alkarshi.abdullrahman@gmail.com</p>
         </div>
     </div>
 
-    <!-- 🧱 COLONNE DROITE -->
+    <!-- COLONNE DROITE -->
     <div class="event-grid">
         <div class="profile-container">
-            <h1>Créer un compte Administrateur </h1>
+            <h1>Créer un compte Administrateur</h1>
 
-            {{ form_start(form) }}
+            {# --- FLASH MESSAGES --- #}
+            {% for message in app.flashes('success') %}
+                <div class="flash-success">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="flash-error">{{ message }}</div>
+            {% endfor %}
+
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', novalidate: 'novalidate', 'data-turbo': 'false', 'style': 'display:flex;flex-direction:column;'}}) }}
+            {{ form_errors(form) }}
+
+            <!-- Avatar rond et cliquable -->
             <div class="profile-picture">
-    <label for="avatarUpload" class="profile-upload">
-        <img id="preview" src="{{ asset('uploads/avatars/default.png') }}" alt="Avatar">
-        {{ form_widget(form.avatar_user) }}
-    </label>
-</div>
+                <label for="{{ form.avatar_user.vars.id }}" class="profile-upload">
+                    <img id="preview" src="{{ asset('uploads/avatars/default.png') }}" alt="Avatar">
+                    {{ form_widget(form.avatar_user) }}
+                </label>
+                {{ form_errors(form.avatar_user) }}
+            </div>
+
+            <div class="form-fields">
+               <div class="form-group gender-group">
+                    {{ form_label(form.gender_user) }}
+                    <div class="gender-options">
+                        {% for choice in form.gender_user %}
+                            <label class="gender-label">
+                                {{ form_widget(choice) }}
+                                {{ choice.vars.label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {{ form_errors(form.gender_user) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.lastname_user) }}
+                    {{ form_widget(form.lastname_user) }}
+                    {{ form_errors(form.lastname_user) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.firstname_user) }}
+                    {{ form_widget(form.firstname_user) }}
+                    {{ form_errors(form.firstname_user) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.city_user) }}
+                    {{ form_widget(form.city_user) }}
+                    {{ form_errors(form.city_user) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.mail_user) }}
+                    {{ form_widget(form.mail_user) }}
+                    {{ form_errors(form.mail_user) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.password_user) }}
+                    <div class="password-field" style="display:flex; align-items:center;">
+                        {{ form_widget(form.password_user) }}
+                        <button type="button"
+                                class="btn-show-password"
+                                data-password-target="{{ form.password_user.vars.id }}"
+                                aria-pressed="false"
+                                title="Voir le mot de passe">
+                            Voir
+                        </button>
+                    </div>
+                    {{ form_errors(form.password_user) }}
+                    <p class="password-requirements">
+                        Votre mot de passe doit contenir au minimum 14 caractères, incluant au moins une majuscule, une minuscule, un chiffre et un caractère spécial.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.datebirth_user) }}
+                    {{ form_widget(form.datebirth_user) }}
+                    {{ form_errors(form.datebirth_user) }}
+                </div>
+            </div>
+
+            <div class="form-actions" style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                <button type="submit" class="btn-submit">Enregistrer</button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</section>
+
+<style>
+/* --- CONTENEUR GLOBAL --- */
+.event-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- COLONNE GAUCHE --- */
+.ColonneGauche {
+    background-color: #005791;
+    width: 40%;
+    padding: 50px 30px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.ColonneGauche h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.ColonneGauche h5 {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+/* --- COLONNE DROITE --- */
+.event-grid {
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- FORMULAIRE --- */
+.profile-container {
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* --- AVATAR --- */
+.profile-picture {
+    margin-bottom: 20px;
+}
+
+.profile-upload {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.profile-upload input[type="file"] {
+    display: none;
+}
+
+.profile-upload img {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #005791;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.profile-upload img:hover {
+    transform: scale(1.05);
+    opacity: 0.8;
+}
+
+/* STYLE REGEX */
+.password-requirements {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 5px;
+}
+
+/* --- CHAMPS DE FORMULAIRE --- */
+.form-fields {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    width: 100%;
+}
+
+.form-fields label,
+.form-group label {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-fields input, 
+.form-fields select,
+.form-group input,
+.form-group select {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* --- BOUTONS RADIO --- */
+.gender-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.gender-group label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.gender-options {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.gender-options input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
+}
+
+/* bouton voir/cacher */
+.btn-show-password {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    background: #005791;
+    color: #fff;
+    cursor: pointer;
+}
+.btn-show-password[aria-pressed="true"] {
+    background: #003f66;
+}
+
+/* --- BOUTON --- */
+.btn-submit {
+    background-color: #005791;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #00406a;
+}
+
+/* --- FLASH MESSAGES --- */
+.flash-success {
+    color: green;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.flash-error {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* --- RESPONSIVE DESKTOP --- */
+@media (max-width: 1024px) {
+    .profile-container {
+        flex-direction: column;
+        height: auto;
+    }
+}
+
+/* --- RESPONSIVE TABLETTE --- */
+@media (max-width: 768px) {
+    .event-container {
+        flex-direction: column;
+        height: auto;
+    }
+    .ColonneGauche, .event-grid {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .profile-container h1 {
+        font-size: 1.8rem;
+    }
+    .ColonneGauche h2 {
+        font-size: 1.8rem;
+    }
+}
+</style>
 
 <script>
-    const input = document.getElementById('{{ form.avatar_user.vars.id }}');
-    const preview = document.getElementById('preview');
+// Preview de l'avatar
+const input = document.getElementById('{{ form.avatar_user.vars.id }}');
+const preview = document.getElementById('preview');
 
+if (input && preview) {
     input.addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
@@ -43,81 +355,25 @@
             reader.readAsDataURL(file);
         }
     });
+}
+
+// Toggle voir/cacher mot de passe
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button[data-password-target]');
+    if (!btn) return;
+
+    const targetId = btn.getAttribute('data-password-target');
+    const input = document.getElementById(targetId);
+    if (!input) return;
+
+    const isPassword = input.getAttribute('type') === 'password';
+    input.setAttribute('type', isPassword ? 'text' : 'password');
+
+    btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+    btn.textContent = isPassword ? 'Cacher' : 'Voir';
+
+    input.focus();
+});
 </script>
 
-
-                {{ form_row(form.gender_user) }}
-                {{ form_row(form.lastname_user) }}
-                {{ form_row(form.firstname_user) }}
-                {{ form_row(form.city_user) }}
-                {{ form_row(form.mail_user) }}
-                {{ form_row(form.password_user) }}
-                {{ form_row(form.datebirth_user) }}
-
-                <button type="submit" class="btn-submit">Enregistrer</button>
-
-                
-
-                {% for message in app.flashes('error') %}
-    <div class="flash-error">
-        {{ message }}
-    </div>
-{% endfor %}
-
-{% for message in app.flashes('success') %}
-    <div class="flash-success">
-        {{ message }}
-    </div>
-{% endfor %}
-
-            {{ form_end(form) }}
-        </div>
-    </div>
-</section>
-
-<style>
-    .event-container {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        padding: 20px;
-    }
-
-    .ColonneGauche {
-        background-color: #005791;
-        width: 40%;
-        padding: 20px;
-        border-radius: 10px;
-    }
-
-    .event-grid {
-        width: 60%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .profile-container {
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .btn-submit {
-        background-color: #005791;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .flash-success {
-        color: green;
-        margin-bottom: 10px;
-    }
-    .flash-error {
-        color: red;
-        margin-bottom: 10px;
-    }
-</style>
 {% endblock %}
