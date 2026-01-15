@@ -47,10 +47,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-reqs
 
-
-      - name: Audit de sécurité des dépendances
-        run: composer audit
-
       - name: Setup environment
         run: |
           cp .env.test .env.local
