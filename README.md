@@ -1,5 +1,10 @@
 ## WebAppEvent 
 
+![PHP Version](https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![Symfony](https://img.shields.io/badge/Symfony-7.x-000000?style=for-the-badge&logo=symfony&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-En%20développement-yellow?style=for-the-badge)
+
 WebAppEvent est une application web développée avec Symfony 7.3 permettant de créer, gérer et consulter des événements.  
 Elle inclut un système d’authentification utilisateur, une interface frontend personnalisée et un backend robuste basé sur Doctrine ORM.
 Cette plateforme permet aux utilisateurs de découvrir des événements, de s’y inscrire et aux administrateurs de les gérer.
