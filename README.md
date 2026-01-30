@@ -44,6 +44,7 @@ Cette plateforme permet aux utilisateurs de découvrir des événements, de s’
 git clone https://github.com/AAlkarshi/WebAppEvent.git
 cd WebAppEvent
 
+``` bash
 ### 2. Installer les dépendances
 composer install
 
