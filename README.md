@@ -39,36 +39,44 @@ Cette plateforme permet aux utilisateurs de découvrir des événements, de s’
 ## Installation
 
 ### 1. Cloner le projet
-
 ```bash
 git clone https://github.com/AAlkarshi/WebAppEvent.git
 cd WebAppEvent
 ```
 
-``` bash
 ### 2. Installer les dépendances
+``` bash
 composer install
 ```
 
-````bash
 ### 3. Configuration environnement
+````bash
 Créer un fichier local avec :
     cp .env .env.local
 ````
 
 ### 4. Ajout de la base de données
+````bash
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
+````
 
 ### 5. Installer les assets ce qui permet d'installer les librairies JS dont ce projet à besoin
+````bash
 php bin/console importmap:install
+````
 
 ### Tests
+````bash
 php bin/phpunit
+````
 
 ## Lancer le projet
+````bash
 php -S localhost:8000/events -t public
+````
 
 ## Auteur
-
+````bash
 AAlkarshi
+````
