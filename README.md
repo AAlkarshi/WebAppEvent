@@ -43,14 +43,18 @@ Cette plateforme permet aux utilisateurs de découvrir des événements, de s’
 ```bash
 git clone https://github.com/AAlkarshi/WebAppEvent.git
 cd WebAppEvent
+```
 
 ``` bash
 ### 2. Installer les dépendances
 composer install
+```
 
+````bash
 ### 3. Configuration environnement
 Créer un fichier local avec :
     cp .env .env.local
+````
 
 ### 4. Ajout de la base de données
 php bin/console doctrine:database:create
