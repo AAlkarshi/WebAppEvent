@@ -1,4 +1,4 @@
-##WebAppEvent 
+## WebAppEvent 
 
 WebAppEvent est une application web développée avec Symfony 7.3 permettant de créer, gérer et consulter des événements.  
 Elle inclut un système d’authentification utilisateur, une interface frontend personnalisée et un backend robuste basé sur Doctrine ORM.
