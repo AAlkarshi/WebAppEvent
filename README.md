@@ -115,6 +115,9 @@ php bin/phpunit
 php -S localhost:8000 -t public
 ```
 
+Puis accédez à l'application via : **http://localhost:8000/events**
+
+
 ## Auteur
 ````bash
 AAlkarshi
