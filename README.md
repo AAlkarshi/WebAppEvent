@@ -39,9 +39,9 @@ Cette plateforme permet aux utilisateurs de découvrir des événements, de s’
 
 ## Structure principale
 src/
- └── Controller/
+     └── Controller/
 templates/
- └── partials/
+     └── partials/
 public/
 assets/
 migrations/
