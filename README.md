@@ -36,17 +36,6 @@ Cette plateforme permet aux utilisateurs de découvrir des événements, de s’
 - Gestion des assets via AssetMapper
 - Frontend Twig
 
-
-## Structure principale
-src/
-     └── Controller/
-templates/
-     └── partials/
-public/
-assets/
-migrations/
-
-
 ## Installation
 
 ### 1. Cloner le projet
