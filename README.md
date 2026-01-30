@@ -37,9 +37,7 @@ Cette plateforme permet aux utilisateurs de découvrir des événements, de s’
 - Frontend Twig
 
 
-
 ## Structure principale
-
 src/
 └── Controller/
 templates/
@@ -47,12 +45,13 @@ templates/
 public/
 assets/
 migrations/
-c'est quoi un assets
+
 
 ## Installation
 
 ### 1. Cloner le projet
 
+```bash
 git clone https://github.com/AAlkarshi/WebAppEvent.git
 cd WebAppEvent
 
@@ -63,7 +62,7 @@ composer install
 Créer un fichier local avec :
     cp .env .env.local
 
-### 4. Ajout de la base de donnée
+### 4. Ajout de la base de données
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 
@@ -72,6 +71,9 @@ php bin/console importmap:install
 
 ### Tests
 php bin/phpunit
+
+## Lancer le projet
+php -S localhost:8000/events -t public
 
 ## Auteur
 
